@@ -4,25 +4,7 @@ export default function AboutContact() {
   return (
     <section id="contact" className="py-20">
       <div className="container mx-auto px-6">
-        <div className="grid lg:grid-cols-3 gap-8 items-stretch">
-          {/* Partner Card */}
-          <div 
-            className="backdrop-blur-[1.5px] rounded-[2.5rem] p-10 border border-white/20 shadow-2xl flex flex-col justify-center items-center text-center transition-all duration-300 hover:bg-white/5" 
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0)' }}
-          >
-            <h2 className="text-xl font-medium text-white/50 mb-8 tracking-widest uppercase">
-              Partnered <span className="text-cyan-400/80">with</span>
-            </h2>
-            <div className="relative group">
-              <div className="absolute -inset-4 bg-cyan-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <img 
-                src="/bichil.png" 
-                alt="Bichil" 
-                className="h-24 md:h-28 object-contain relative transition-transform duration-500 group-hover:scale-105"
-              />
-            </div>
-          </div>
-
+        <div className="grid lg:grid-cols-2 gap-8 items-stretch">
           {/* Contact Info Card */}
           <div 
             className="backdrop-blur-[1.5px] rounded-[2.5rem] p-10 border border-white/20 shadow-2xl transition-all duration-300 hover:bg-white/5" 

@@ -1,46 +1,17 @@
-import { useState, useEffect } from 'react';
-
-const slides = [
-  { image: '/1.png', title: 'Innovation First', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-  { image: '/2.png', title: 'Creative Design', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-  { image: '/3.png', title: 'Digital Solutions', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-  { image: '/4.png', title: 'Future Forward', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-  { image: '/5.png', title: 'Excellence', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-];
-
-const techs = [
-  { name: "React", src: "/react.png" },
-  { name: "TailwindCSS", src: "/tailwindcss.png" },
-  { name: "Node.js", src: "/nodejs.png" },
-  { name: "Python", src: "/python.png" },
-  { name: "PHP", src: "/php.png" },
-  { name: "Flutter", src: "/flutter.png" },
-  { name: "Kotlin", src: "/kotlin.png" },
-  { name: "PostgreSQL", src: "/postgresql.png" },
-  { name: "AWS", src: "/aws.png" },
+const partners = [
+  { name: 'IBM', logo: '/1.png' },
+  { name: 'Microsoft', logo: '/2.png' },
+  { name: 'Oracle', logo: '/3.png' },
+  { name: 'Google', logo: '/4.png' },
+  { name: 'Amazon', logo: '/5.png' },
 ];
 
 export default function HeroSection() {
-  const [currentIndex, setCurrentIndex] = useState(2);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % slides.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const getSlidePosition = (index: number) => {
-    const diff = index - currentIndex;
-    if (diff === 0) return 'center';
-    if (diff === 1 || diff === -(slides.length - 1)) return 'right';
-    if (diff === -1 || diff === slides.length - 1) return 'left';
-    if (diff === 2 || diff === -(slides.length - 2)) return 'far-right';
-    return 'far-left';
-  };
-
   return (
-    <section id="home" className="min-h-screen flex items-start md:items-center pt-24 md:pt-20 pb-10 relative">
+    <section
+      id="home"
+      className="relative min-h-screen flex items-start md:items-center pt-24 md:pt-20 pb-32"
+    >
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="space-y-4 max-w-lg">
@@ -53,79 +24,37 @@ export default function HeroSection() {
               Cutting-edge tools to grow and scale your business.
             </p>
           </div>
-
-          <div className="relative">
-            {/* DESKTOP 3D CAROUSEL */}
-            <div className="hidden md:flex relative h-[500px] items-center justify-center">
-              {slides.map((slide, index) => {
-                const position = getSlidePosition(index);
-                return (
-                  <div
-                    key={index}
-                    className={`absolute transition-all duration-500 ${
-                      position === 'center'
-                        ? 'z-10 scale-100 opacity-100 translate-x-0'
-                        : 'hidden md:block opacity-50 scale-75 blur-sm'
-                    } ${
-                      position === 'left' ? '-translate-x-32 md:-translate-x-64' : ''
-                    } ${
-                      position === 'right' ? 'translate-x-32 md:translate-x-64' : ''
-                    }`}
-                  >
-                    <div className="relative w-52 h-72 md:w-64 md:h-80">
-                      <img
-                        src={slide.image}
-                        alt="Gallery"
-                        className="w-full h-full object-cover rounded-3xl shadow-2xl hover:shadow-cyan-500/30 transition-shadow border border-cyan-500/30"
-                      />
-                      <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-black/80 to-transparent rounded-3xl">
-                        <h3 className="text-2xl font-bold text-white mb-2">{slide.title}</h3>
-                        <p className="text-gray-300 text-sm leading-relaxed">{slide.description}</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* MOBILE INFINITE SLIDER */}
-            <div className="md:hidden overflow-hidden relative h-[260px] mt-6">
-              <div className="flex animate-scroll gap-6 w-max">
-                {[...slides, ...slides].map((slide, index) => (
-                  <div key={index} className="w-48 h-64 flex-shrink-0">
-                    <img
-                      src={slide.image}
-                      alt="slide"
-                      className="w-full h-full object-cover rounded-2xl border border-cyan-500/30"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
+      </div>
 
-        {/* Technologies We Use Section */}
-        <div className="mt-8">
-          <div className="bg-transparent backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-4 place-items-center">
-              {techs.map((tech) => (
+      {/* Partners - positioned at bottom */}
+      <div className="absolute bottom-6 left-0 w-full px-6">
+        <div className="container mx-auto">
+          {/* Line separator */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent"></div>
+
+          <div 
+            className="relative overflow-hidden rounded-xl p-4 md:p-6 border border-white/15"
+            style={{
+              backdropFilter: 'blur(1.5px)',
+              WebkitBackdropFilter: 'blur(1.5px)',
+              background: 'rgba(255,255,255,0)',
+            }}
+          >
+            {/* Fade edges */}
+            <div className="absolute left-0 top-0 h-full w-16 bg-gradient-to-r from-black to-transparent pointer-events-none z-10"></div>
+            <div className="absolute right-0 top-0 h-full w-16 bg-gradient-to-l from-black to-transparent pointer-events-none z-10"></div>
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 place-items-center">
+              {partners.map((partner, index) => (
                 <div
-                  key={tech.name}
-                  className="group transition duration-300"
+                  key={index}
+                  className="flex items-center justify-center w-40 md:w-280 h-120 md:h-140 animate-[float_6s_ease-in-out_infinite]"
                 >
                   <img
-                    src={tech.src}
-                    alt={tech.name}
-                    className="
-                      w-10 h-10 object-contain
-                      opacity-100
-                      md:grayscale md:opacity-70
-                      md:group-hover:grayscale-0
-                      md:group-hover:opacity-100
-                      md:group-hover:scale-110
-                      transition duration-300
-                    "
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="max-h-8 md:max-h-10 max-w-full object-contain opacity-90 hover:scale-105 transition-all duration-300"
                   />
                 </div>
               ))}
