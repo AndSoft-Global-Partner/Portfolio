@@ -5,10 +5,22 @@ import AboutContact from './components/AboutContact';
 import Footer from './components/Footer';
 import { useEffect, useRef } from 'react';
 
+function hslToHex(h: number, s: number, l: number) {
+  s /= 100;
+  l /= 100;
+
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) =>
+    Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
+
+  return (f(0) << 16) + (f(8) << 8) + f(4);
+}
+
 function App() {
   const vantaRef = useRef<HTMLDivElement>(null);
-  const lastScrollRef = useRef(0);
   const vantaInstanceRef = useRef<any>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // Initialize Vanta Globe
@@ -23,6 +35,7 @@ function App() {
         scale: 1,
         scaleMobile: 1,
         color: 0x06b6d4,
+        color2: 0x8b5cf6,
         backgroundColor: 0x0a0e27,
       });
     }
@@ -35,19 +48,58 @@ function App() {
     };
   }, []);
 
-  // Update globe rotation based on scroll
+  // Pause video after 2.5 seconds
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScroll = window.scrollY;
-      const scrollSpeed = Math.abs(currentScroll - lastScrollRef.current);
-      lastScrollRef.current = currentScroll;
+    const timer = setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+      }
+    }, 2500); // 2.5 seconds
 
-      if (vantaInstanceRef.current) {
-        // Rotate globe based on scroll position
-        const rotation = (currentScroll / 100) % 360;
-        if (vantaInstanceRef.current.renderer) {
-          vantaInstanceRef.current.renderer.domElement.style.filter = `hue-rotate(${rotation * 0.5}deg)`;
-        }
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Update globe colors based on scroll (smooth 3-stage interpolation)
+  useEffect(() => {
+    let ticking = false;
+
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+
+      const progress = scrollY / docHeight;
+
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          if (vantaInstanceRef.current) {
+            let hue;
+
+            if (progress < 0.5) {
+              // Cyan → Pink
+              const t = progress / 0.5;
+              hue = lerp(190, 320, t);
+            } else {
+              // Pink → Red
+              const t = (progress - 0.5) / 0.5;
+              hue = lerp(320, 360, t); // 360 ≈ 0 red
+            }
+
+            const color1 = hslToHex(hue, 85, 55);
+            const color2 = hslToHex(hue + 15, 85, 45);
+
+            vantaInstanceRef.current.setOptions({
+              color: color1,
+              color2: color2,
+            });
+          }
+
+          ticking = false;
+        });
+
+        ticking = true;
       }
     };
 
@@ -63,15 +115,15 @@ function App() {
         style={{ minHeight: '100vh' }}
       />
       
-      <div
-        className="fixed inset-0 z-1 opacity-60"
-        style={{
-          backgroundImage: 'url(/AndSoftGalaxyBackground.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      />
+      <video
+        ref={videoRef}
+        className="fixed inset-0 z-1 opacity-40 w-full h-full object-cover"
+        autoPlay
+        muted
+        playsInline
+      >
+        <source src="/galaxy.mp4" type="video/mp4" />
+      </video>
 
       <div className="relative z-10">
         <Header />

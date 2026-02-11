@@ -5,13 +5,23 @@ export default function Header() {
   const [language, setLanguage] = useState('EN');
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md border-b border-cyan-500/20">
+    <header 
+      className="mt-6 mx-auto w-[95%] md:w-[90%] max-w-7xl rounded-2xl border border-white/20 z-50"
+      style={{
+        background: 'rgba(255, 255, 255, 0.05)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
+      }}
+    >
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-white">
-              <span className="text-cyan-400">And</span>Soft
-            </div>
+          <div className="flex items-center">
+            <img
+              src="/andsoft.png"
+              alt="AndSoft"
+              className="h-10 md:h-12 object-contain transition-all duration-300 hover:scale-105 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]"
+            />
           </div>
 
           <nav className="hidden md:flex items-center space-x-8">
@@ -36,7 +46,6 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <div className="h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
     </header>
   );
 }
