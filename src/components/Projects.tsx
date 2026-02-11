@@ -255,7 +255,7 @@ export default function Projects() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .perspective {
           perspective: 1400px;
         }
