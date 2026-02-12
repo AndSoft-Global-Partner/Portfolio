@@ -33,13 +33,9 @@ export default function Projects() {
     }
   ];
 
-  // Looped projects for infinite scroll
-  const loopProjects = [...projects, ...projects];
-
   // Rotation angle (continuous)
   const [rotation, setRotation] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const mobileRef = useRef<HTMLDivElement | null>(null);
 
   // Auto rotate every 5 seconds
   useEffect(() => {
@@ -53,35 +49,6 @@ export default function Projects() {
 
     return () => clearInterval(timer);
   }, [projects.length, isPaused]);
-
-  // Mobile auto-scroll
-  useEffect(() => {
-    const el = mobileRef.current;
-    if (!el) return;
-
-    let scrollAmount = 0;
-    const cardWidth = 260 + 16; // card width + gap
-    const singleSetScroll = cardWidth * projects.length; // First 4 cards scroll distance
-
-    const interval = setInterval(() => {
-      if (isPaused) return;
-
-      scrollAmount += 270;
-
-      // Reset when reaching end of first set (seamless loop)
-      if (scrollAmount >= singleSetScroll) {
-        scrollAmount = 0;
-        el.scrollLeft = 0; // Jump back without animation
-      } else {
-        el.scrollTo({
-          left: scrollAmount,
-          behavior: "smooth"
-        });
-      }
-    }, 1500);
-
-    return () => clearInterval(interval);
-  }, [isPaused, projects.length]);
 
   const getCardStyle = (index: number) => {
     const total = projects.length;
@@ -118,7 +85,7 @@ export default function Projects() {
     return {
       transform: `rotateY(${rotate}deg) translateZ(${radius}px) scale(${scale})`,
       opacity,
-      transition: "transform 1.1s cubic-bezier(0.22, 1, 0.36, 1), opacity 1s",
+      transition: "transform 1.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s",
       position: "absolute" as const,
       width: "100%",
       maxWidth: "380px",
@@ -138,6 +105,17 @@ export default function Projects() {
     return !(normalizedRotate > 120 && normalizedRotate < 240);
   };
 
+  // Check if card is at front (text only visible here)
+  const isFrontCard = (index: number) => {
+    const total = projects.length;
+    const angle = 360 / total;
+    const rotate = (angle * index + rotation) % 360;
+    const normalized = rotate < 0 ? rotate + 360 : rotate;
+
+    // Only show text if near front (±25deg)
+    return normalized < 25 || normalized > 335;
+  };
+
   return (
     <section 
       className="py-24 overflow-hidden relative"
@@ -155,7 +133,14 @@ export default function Projects() {
           <div className="carousel">
             {projects.map((project, index) => (
               <div key={index} style={getCardStyle(index)}>
-                <div className="rounded-[2.5rem] overflow-hidden border border-white/10 shadow-xl relative h-72 group">
+                <div
+                  className="rounded-[2.5rem] overflow-hidden border border-white/10 shadow-xl relative h-72 group"
+                  style={{
+                    filter: isFrontCard(index)
+                      ? "brightness(1.05)"
+                      : "brightness(0.75)"
+                  }}
+                >
                   <img 
                     src={project.image} 
                     alt={project.title}
@@ -165,7 +150,7 @@ export default function Projects() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                   
                   <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                    {isCardVisible(index) ? (
+                    {isFrontCard(index) && (
                       <>
                         <h3 className="text-lg font-bold text-white mb-2">
                           {project.title}
@@ -182,8 +167,6 @@ export default function Projects() {
                           <ExternalLink size={14} />
                         </div>
                       </>
-                    ) : (
-                      <div className="h-0" />
                     )}
                   </div>
                 </div>
@@ -210,20 +193,12 @@ export default function Projects() {
         </div>
 
         {/* Mobile slider */}
-        <div className="relative md:hidden">
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-black to-transparent z-10" />
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black to-transparent z-10" />
-
-          <div
-            ref={mobileRef}
-            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory px-6 no-scrollbar"
-            onTouchStart={() => setIsPaused(true)}
-            onTouchEnd={() => setIsPaused(false)}
-          >
-            {loopProjects.map((project, index) => (
+        <div className="relative md:hidden overflow-hidden px-6">
+          <div className="scroller-inner">
+            {[...projects, ...projects].map((project, index) => (
               <div
                 key={index}
-                className="min-w-[260px] snap-center rounded-3xl overflow-hidden border border-white/10 shadow-xl relative h-64"
+                className="min-w-[260px] mr-4 rounded-3xl overflow-hidden border border-white/10 shadow-xl relative h-64 flex-shrink-0"
               >
                 <img
                   src={project.image}
@@ -238,16 +213,9 @@ export default function Projects() {
                     {project.title}
                   </h3>
 
-                  <p className="text-white/80 mb-3 text-xs leading-relaxed line-clamp-2">
+                  <p className="text-white/80 text-xs line-clamp-2">
                     {project.description}
                   </p>
-
-                  <div className="flex items-center text-cyan-400">
-                    <span className="text-xs font-semibold mr-2">
-                      View Case Study
-                    </span>
-                    <ExternalLink size={14} />
-                  </div>
                 </div>
               </div>
             ))}
@@ -257,7 +225,7 @@ export default function Projects() {
 
       <style>{`
         .perspective {
-          perspective: 1400px;
+          perspective: 1700px;
         }
 
         .carousel {
@@ -268,6 +236,21 @@ export default function Projects() {
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+
+        .scroller-inner {
+          display: flex;
+          width: max-content;
+          animation: scrollLoop 20s linear infinite;
+        }
+
+        @keyframes scrollLoop {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
         }
 
         .no-scrollbar::-webkit-scrollbar {
