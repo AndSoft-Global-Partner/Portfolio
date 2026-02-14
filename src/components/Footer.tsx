@@ -23,12 +23,12 @@ export default function Footer() {
 
   const termHeight =
     termSize === "small"
-      ? "h-[140px]"
+      ? "h-[120px]"
       : termSize === "large"
-      ? "h-[420px]"
+      ? "h-[300px]"
       : termSize === "full"
-      ? "h-[600px]"
-      : "h-[220px]";
+      ? "h-[420px]"
+      : "h-[180px]";
 
   const fileSystem = {
     "/": ["home"],
@@ -410,28 +410,25 @@ Reading package lists...  Done`);
   };
 
   return (
-    <footer className="relative bg-black/50 backdrop-blur-md border-t border-cyan-500/20 py-8 md:py-12 overflow-hidden">
+    <footer className="relative bg-black/50 backdrop-blur-md border-t border-cyan-500/20 py-6 md:py-8 overflow-hidden">
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute w-64 h-64 md:w-96 md:h-96 bg-cyan-400 blur-3xl rounded-full top-0 left-1/4 animate-pulse"></div>
         <div className="absolute w-64 h-64 md:w-96 md:h-96 bg-blue-400 blur-3xl rounded-full bottom-0 right-1/4 animate-pulse"></div>
       </div>
       <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
         {/* AndSoft Section */}
-        <div className="mb-12 md:mb-16">
+        <div className="mb-6 md:mb-8">
           <div className="max-w-sm">
             <div className="text-2xl font-bold text-white mb-4 relative inline-block group cursor-pointer">
               <span className="text-cyan-400 group-hover:text-cyan-300 transition">And</span>
               <span className="group-hover:text-cyan-100 transition">Soft</span>
               <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-20 blur-xl transition pointer-events-none"></div>
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed md:text-base md:leading-relaxed">
-              Leading provider of cutting-edge technology solutions to empower businesses worldwide. Partnering for innovation and growth.
-            </p>
           </div>
         </div>
 
         {/* Console + System Status Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 lg:gap-20 mb-6 md:mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mb-4">
           {/* Console */}
           <div className="md:border-l md:border-cyan-500/10 md:pl-8">
             <h4 className="text-white font-semibold mb-4">Console</h4>
@@ -622,7 +619,7 @@ Reading package lists...  Done`);
           </div>
         </div>
 
-        <div className="border-t border-cyan-500/20 pt-8 flex flex-col gap-4 md:flex-row md:justify-between md:items-center md:gap-8">
+        <div className="border-t border-cyan-500/20 pt-4 flex flex-col gap-3 md:flex-row md:justify-between md:items-center md:gap-6">
           <div className="text-gray-400 text-xs md:text-sm mb-4 md:mb-0">
             © {new Date().getFullYear()} AndSoft. All rights reserved.
           </div>
@@ -657,7 +654,7 @@ Reading package lists...  Done`);
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-cyan-500/10 flex justify-center">
+        <div className="mt-4 pt-4 border-t border-cyan-500/10 flex justify-center">
           <div className="text-green-400 font-mono text-xs animate-pulse tracking-widest">
             SYSTEM ONLINE ● ANDSOFT v1.0
             <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent mt-2 opacity-50"></div>
