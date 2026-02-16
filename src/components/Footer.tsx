@@ -14,7 +14,7 @@ export default function Footer() {
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [bootSequenceShown, setBootSequenceShown] = useState(false);
   const [_theme, _setTheme] = useState<"cyan" | "green" | "amber" | "red">("cyan");
-  const [dynamicFiles, setDynamicFiles] = useState<Record<string, string>>({});
+  const [dynamicFiles, setDynamicFiles] = useState<Record<string, { type: "file" | "dir", content?: string, path: string }>>({});
   const [nanoMode, setNanoMode] = useState(false);
   const [nanoFile, setNanoFile] = useState("");
   const [nanoContent, setNanoContent] = useState("");
@@ -48,6 +48,41 @@ export default function Footer() {
       : termSize === "full"
       ? "h-[480px]"
       : "h-[220px]";
+
+  const themeColor = {
+    cyan: "text-cyan-400",
+    green: "text-green-400",
+    amber: "text-amber-400",
+    red: "text-red-400"
+  }[_theme];
+
+  const themeBright = {
+    cyan: "text-cyan-300/90",
+    green: "text-green-300/90",
+    amber: "text-amber-300/90",
+    red: "text-red-300/90"
+  }[_theme];
+
+  const themeDim = {
+    cyan: "text-cyan-500/40",
+    green: "text-green-500/40",
+    amber: "text-amber-500/40",
+    red: "text-red-500/40"
+  }[_theme];
+
+  const themeBorder = {
+    cyan: "border-cyan-500/10",
+    green: "border-green-500/10",
+    amber: "border-amber-500/10",
+    red: "border-red-500/10"
+  }[_theme];
+
+  const themeBg = {
+    cyan: "bg-cyan-400/[0.06]",
+    green: "bg-green-400/[0.06]",
+    amber: "bg-amber-400/[0.06]",
+    red: "bg-red-400/[0.06]"
+  }[_theme];
 
   const fileSystem = {
     "/": ["home"],
@@ -105,8 +140,7 @@ The question is…
 
 What do you choose to be.`;
 
-  const isDirectory = (path: string) => fileSystem[path as keyof typeof fileSystem] !== undefined;
-  const isFile = (name: string) => fileContents[name as keyof typeof fileContents] !== undefined;
+
 
   const progressBar = (percent: number): string => {
     const filled = Math.floor(percent / 10);
@@ -204,40 +238,54 @@ theme      change theme color
 crash      crash system [ROOT]`,
 
     ls: (): string => {
-      const items = fileSystem[currentDir as keyof typeof fileSystem];
-      if (!items) return "directory not found";
-      return items
-        .map((item: string) => {
-          const path = currentDir === "/" ? `/${item}` : `${currentDir}/${item}`;
-          if (isDirectory(path)) {
-            return `[BLUE]${item}[/BLUE]`;
-          }
-          return `[GRAY]${item}[/GRAY]`;
+      const staticItems = fileSystem[currentDir as keyof typeof fileSystem] || [];
+      const dynamicItems = Object.values(dynamicFiles)
+        .filter(file => {
+          const parent = file.path.substring(0, file.path.lastIndexOf("/")) || "/";
+          return parent === currentDir;
         })
-        .join("   ");
+        .map(file => {
+          const name = file.path.split("/").pop();
+          return file.type === "dir"
+            ? `[BLUE]${name}[/BLUE]`
+            : `[GRAY]${name}[/GRAY]`;
+        });
+      return [...staticItems.map(i => `[GRAY]${i}[/GRAY]`), ...dynamicItems].join("   ");
     },
 
     cd: async (args: string[]): Promise<string> => {
       const target = args[0] || "~";
       const newPath = resolvePath(target);
 
-      if (isDirectory(newPath)) {
+      if (fileSystem[newPath as keyof typeof fileSystem]) {
         setPrevDir(currentDir);
         setCurrentDir(newPath);
         return "";
       }
 
-      if (isFile(target)) {
-        await typeText(fileContents[target as keyof typeof fileContents]);
+      const dynamicDir = Object.values(dynamicFiles)
+        .find(file => file.type === "dir" && file.path === newPath);
+
+      if (dynamicDir) {
+        setPrevDir(currentDir);
+        setCurrentDir(newPath);
         return "";
       }
 
-      return `cd: no such file or directory: ${target}`;
+      return `cd: no such directory: ${target}`;
     },
 
     cat: async (args: string[]): Promise<string> => {
       const file = args[0];
       if (!file) return "usage: cat <file>";
+      
+      const fullPath = `${currentDir}/${file}`.replace("//", "/");
+      const dynamicFile = Object.values(dynamicFiles).find(f => f.path === fullPath && f.type === "file");
+      
+      if (dynamicFile && dynamicFile.content) {
+        await typeText(dynamicFile.content);
+        return "";
+      }
       
       const content = fileContents[file as keyof typeof fileContents];
       if (!content) return "cat: no such file";
@@ -246,7 +294,7 @@ crash      crash system [ROOT]`,
       return "";
     },
 
-    whoami: (): string => "guest",
+    whoami: (): string => user,
 
     pwd: (): string => currentDir,
 
@@ -366,14 +414,29 @@ Network Status: CONNECTED
     touch: (args: string[]): string => {
       const name = args[0];
       if (!name) return "usage: touch <filename>";
-      setDynamicFiles(prev => ({ ...prev, [name]: "" }));
+      const fullPath = `${currentDir}/${name}`.replace("//", "/");
+      setDynamicFiles(prev => ({
+        ...prev,
+        [fullPath]: {
+          type: "file",
+          content: "",
+          path: fullPath
+        }
+      }));
       return `created ${name}`;
     },
 
     mkdir: (args: string[]): string => {
       const name = args[0];
       if (!name) return "usage: mkdir <dirname>";
-      setDynamicFiles(prev => ({ ...prev, [name + "/"]: "" }));
+      const fullPath = `${currentDir}/${name}`.replace("//", "/");
+      setDynamicFiles(prev => ({
+        ...prev,
+        [fullPath]: {
+          type: "dir",
+          path: fullPath
+        }
+      }));
       return `directory created: ${name}`;
     },
 
@@ -381,9 +444,10 @@ Network Status: CONNECTED
       if (!await requireRoot()) return "";
       const name = args[0];
       if (!name) return "usage: rm <file>";
+      const fullPath = `${currentDir}/${name}`.replace("//", "/");
       setDynamicFiles(prev => {
         const newFiles = { ...prev };
-        delete newFiles[name];
+        delete newFiles[fullPath];
         return newFiles;
       });
       return `removed ${name}`;
@@ -396,8 +460,16 @@ Network Status: CONNECTED
         return "";
       }
       setNanoFile(file);
+      const fullPath = `${currentDir}/${file}`.replace("//", "/");
+      const dynamicFile = Object.values(dynamicFiles).find(f => f.path === fullPath && f.type === "file");
+      if (dynamicFile) {
+        setNanoContent(dynamicFile.content || "");
+      } else if (fileContents[file as keyof typeof fileContents]) {
+        setNanoContent(fileContents[file as keyof typeof fileContents]);
+      } else {
+        setNanoContent("");
+      }
       setNanoMode(true);
-      setNanoContent(dynamicFiles[file] || "");
       return "";
     },
 
@@ -422,6 +494,7 @@ Network Status: CONNECTED
     connect: async (args: string[]): Promise<string> => {
       const node = args[0] || "node1";
       setActiveNode(node.toUpperCase());
+      _setSystemId(Math.floor(Math.random()*9999));
       await typeText(`Connecting to ${node}...`);
       await typeText("Connection established.");
       return "";
@@ -466,10 +539,13 @@ Network Status: CONNECTED
       await typeText("SYSTEM FAILURE");
       await typeText("REBOOT REQUIRED");
       
-      setTimeout(() => {
+      setTimeout(async () => {
         _setSystemCrashed(false);
         setBootSequenceShown(false);
-        setHistory([]);
+        setShowBootScreen(true);
+        await new Promise(r => setTimeout(r, 2000));
+        setShowBootScreen(false);
+        await typeText("[ OK ] System rebooted.", "system");
       }, 3000);
       
       return "";
@@ -506,7 +582,7 @@ Network Status: CONNECTED
       if (loginUser === "root") {
         setHistory(prev => [
           ...prev,
-          { text: "guest@andsoft:~$ Password: ••••", type: "input" }
+          { text: `${user}@${activeNode}:~$ Password: ••••`, type: "input" }
         ]);
         setUser("root");
         setHistory(prev => [
@@ -522,7 +598,7 @@ Network Status: CONNECTED
       if (cmd === "1") {
         setHistory(prev => [
           ...prev,
-          { text: "guest@andsoft:~$ " + cmd, type: "input" }
+          { text: `${user}@${activeNode}:~$ ` + cmd, type: "input" }
         ]);
         setHistory(prev => [
           ...prev,
@@ -535,7 +611,7 @@ Network Status: CONNECTED
       } else {
         setHistory(prev => [
           ...prev,
-          { text: "guest@andsoft:~$ " + cmd, type: "input" }
+          { text: `${user}@${activeNode}:~$ ` + cmd, type: "input" }
         ]);
         setHistory(prev => [
           ...prev,
@@ -552,16 +628,17 @@ Network Status: CONNECTED
     }
 
     const parts = cmd.trim().split(" ");
-    const base = parts[0];
+    const aliases: Record<string, string> = { dir: "ls", cls: "clear", exit: "clear" };
+    const base = aliases[parts[0]] || parts[0];
     const args = parts.slice(1);
 
     if (!cmd.trim()) return;
 
-    setCommandHistory(prev => [cmd, ...prev]);
+    setCommandHistory(prev => prev[0] === cmd ? prev : [cmd, ...prev]);
 
     setHistory(prev => [
       ...prev,
-      { text: `guest@andsoft:${currentDir}$ ${cmd}`, type: "input" }
+      { text: `${user}@${activeNode}:${currentDir}$ ${cmd}`, type: "input" }
     ]);
 
     if (commands[base as keyof typeof commands]) {
@@ -583,6 +660,8 @@ Network Status: CONNECTED
         { text: `Command not found: ${base}`, type: "error" }
       ]);
     }
+
+    setShowAutocomplete(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
@@ -662,6 +741,70 @@ Network Status: CONNECTED
     }
   }, [history]);
 
+  // Load persistent login state
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("term_user");
+      if (saved === "root") setUser("root");
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, []);
+
+  // Save persistent login state
+  useEffect(() => {
+    try {
+      localStorage.setItem("term_user", user);
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, [user]);
+
+  // Load command history from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("cmd_history");
+      if (saved) setCommandHistory(JSON.parse(saved));
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }, []);
+
+  // Save command history to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("cmd_history", JSON.stringify(commandHistory));
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, [commandHistory]);
+
+  // Load persistent dynamic files
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("term_files");
+      if (saved) setDynamicFiles(JSON.parse(saved));
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }, []);
+
+  // Save persistent dynamic files
+  useEffect(() => {
+    try {
+      localStorage.setItem("term_files", JSON.stringify(dynamicFiles));
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, [dynamicFiles]);
+
+  // Auto-focus terminal
+  useEffect(() => {
+    if (showTerminal) {
+      textareaRef.current?.focus();
+    }
+  }, [showTerminal]);
+
   // Matrix rain animation
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -701,7 +844,7 @@ Network Status: CONNECTED
         drops[i] += Math.random() * 3 + 1;
       }
 
-      requestAnimationFrame(draw);
+      setTimeout(draw, 33);
     };
 
     const handleResize = () => {
@@ -721,17 +864,20 @@ Network Status: CONNECTED
   useEffect(() => {
     if (showTerminal && !bootSequenceShown && showBootScreen) {
       setBootSequenceShown(true);
-      // Wait briefly then hide boot screen
-      setTimeout(() => {
-        setShowBootScreen(false);
-        setHistory(prev => [
-          ...prev,
-          { text: "[ OK ] Initializing kernel...", type: "system" },
-          { text: "[ OK ] Loading modules...", type: "system" },
-          { text: "[ OK ] Connecting to network...", type: "system" },
-          { text: "[ OK ] AndSoft system ready.", type: "system" }
-        ]);
-      }, 4000);
+      const runBootSequence = async () => {
+        setTimeout(() => {
+          setShowBootScreen(false);
+        }, 4000);
+        
+        // Delay before showing boot messages
+        await new Promise(r => setTimeout(r, 4100));
+        
+        await typeText("[ OK ] Initializing kernel...", "system");
+        await typeText("[ OK ] Loading modules...", "system");
+        await typeText("[ OK ] Connecting to network...", "system");
+        await typeText("[ OK ] AndSoft system ready.", "system");
+      };
+      runBootSequence();
     }
   }, [showTerminal, bootSequenceShown, showBootScreen]);
 
@@ -749,21 +895,22 @@ Network Status: CONNECTED
   // Sound effects using Web Audio API
   const playSound = (frequency: number, duration: number, type: 'sine' | 'square' | 'triangle' = 'sine') => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
 
-      oscillator.frequency.value = frequency;
-      oscillator.type = type;
+      osc.frequency.value = frequency;
+      osc.type = type;
+      gain.gain.value = 0.05;
 
-      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + duration);
+      osc.start();
+      setTimeout(() => {
+        osc.stop();
+        ctx.close();
+      }, duration * 1000);
     } catch (e) {
       // Audio not supported
     }
@@ -926,8 +1073,19 @@ Network Status: CONNECTED
                     onKeyDown={(e) => {
                       if (e.ctrlKey && e.key === 'x') {
                         e.preventDefault();
-                        setDynamicFiles(prev => ({ ...prev, [nanoFile]: nanoContent }));
+                        const fullPath = `${currentDir}/${nanoFile}`.replace("//", "/");
+                        setDynamicFiles(prev => ({
+                          ...prev,
+                          [fullPath]: {
+                            type: "file",
+                            content: nanoContent,
+                            path: fullPath
+                          }
+                        }));
                         setNanoMode(false);
+                        setTimeout(() => {
+                          typeText(`Saved ${nanoFile}`, "system");
+                        }, 100);
                       }
                     }}
                     className="flex-1 bg-transparent text-cyan-300 outline-none p-4 resize-none"
@@ -945,15 +1103,15 @@ Network Status: CONNECTED
                 setShowTerminal(!showTerminal);
                 playSound(600, 0.1, 'sine');
               }}
-              className="flex items-center gap-2.5 text-sm text-gray-500 hover:text-cyan-400 transition-colors duration-200 mb-4 group"
+              className={`flex items-center gap-2.5 text-sm text-gray-500 hover:${themeColor} transition-colors duration-200 mb-4 group`}
             >
-              <div className="p-1.5 rounded-lg bg-cyan-400/[0.06] border border-cyan-500/10 group-hover:border-cyan-500/30 transition">
-                <Terminal size={13} className="text-cyan-500/50 group-hover:text-cyan-400 transition" />
+              <div className={`p-1.5 rounded-lg ${themeBg} border ${themeBorder} group-hover:border-${_theme}-500/30 transition`}>
+                <Terminal size={13} className={`${themeColor}/50 group-hover:${themeColor} transition`} />
               </div>
               <span className="font-mono text-xs uppercase tracking-widest">
                 {showTerminal ? "Close Terminal" : "Open Terminal"}
               </span>
-              <span className={`text-[10px] text-cyan-500/40 transition-transform duration-300 ${showTerminal ? "rotate-180" : ""}`}>▼</span>
+              <span className={`text-[10px] ${themeDim} transition-transform duration-300 ${showTerminal ? "rotate-180" : ""}`}>▼</span>
             </button>
 
             <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showTerminal ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
@@ -961,7 +1119,7 @@ Network Status: CONNECTED
                 w-full
                 max-w-2xl
                 bg-[#0a0e27]/90
-                border border-cyan-500/10
+                border ${themeBorder}
                 rounded-2xl
                 p-5
                 font-mono
@@ -984,26 +1142,26 @@ Network Status: CONNECTED
                       <div className="w-2.5 h-2.5 rounded-full bg-green-500/70 hover:bg-green-500 transition cursor-pointer"></div>
                     </div>
                     <div className="flex items-center gap-1.5 ml-1">
-                      <div className="w-1 h-1 rounded-full bg-cyan-400/40 animate-pulse"></div>
+                      <div className={`w-1 h-1 rounded-full ${themeColor}/40 animate-pulse`}></div>
                       <span className="text-gray-600 text-[10px] uppercase tracking-widest">andsoft — bash</span>
                     </div>
                   </div>
                   <div className="flex gap-1">
                     <button
                       onClick={() => setTermSize("small")}
-                      className="text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-cyan-400/10 text-gray-600 hover:text-cyan-400 transition flex items-center justify-center"
+                      className={`text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-white/10 text-gray-600 hover:${themeColor} transition flex items-center justify-center`}
                     >
                       −
                     </button>
                     <button
                       onClick={() => setTermSize(termSize === "full" ? "normal" : "full")}
-                      className="text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-cyan-400/10 text-gray-600 hover:text-cyan-400 transition flex items-center justify-center"
+                      className={`text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-white/10 text-gray-600 hover:${themeColor} transition flex items-center justify-center`}
                     >
                       □
                     </button>
                     <button
                       onClick={() => setTermSize("large")}
-                      className="text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-cyan-400/10 text-gray-600 hover:text-cyan-400 transition flex items-center justify-center"
+                      className={`text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-white/10 text-gray-600 hover:${themeColor} transition flex items-center justify-center`}
                     >
                       +
                     </button>
@@ -1028,7 +1186,7 @@ Network Status: CONNECTED
                       );
                     }
 
-                    let baseColor = "text-cyan-300/90";
+                    let baseColor = themeBright;
                     if (line.type === "input") baseColor = "text-gray-400";
                     if (line.type === "error") baseColor = "text-red-400/80";
                     if (line.type === "system") baseColor = "text-gray-600";
@@ -1038,7 +1196,7 @@ Network Status: CONNECTED
                       return parts.map((part: string, idx: number) => {
                         if (part.startsWith("[BLUE]")) {
                           const content = part.replace(/\[BLUE\]|\[\/BLUE\]/g, "");
-                          return <span key={idx} className="text-cyan-400">{content}</span>;
+                          return <span key={idx} className={themeColor}>{content}</span>;
                         } else if (part.startsWith("[GRAY]")) {
                           const content = part.replace(/\[GRAY\]|\[\/GRAY\]/g, "");
                           return <span key={idx} className="text-gray-500">{content}</span>;
@@ -1058,7 +1216,7 @@ Network Status: CONNECTED
                 {/* Terminal input */}
                 <div className="mt-auto pt-3 border-t border-white/[0.04]">
                   <div className="flex items-start gap-2 relative">
-                    <span className="text-cyan-500/70 shrink-0 whitespace-nowrap text-xs font-mono">
+                    <span className={`${themeColor}/70 shrink-0 whitespace-nowrap text-xs font-mono`}>
                       {user}@{activeNode}:{currentDir}$
                     </span>
                     <div className="flex-1 relative">
@@ -1070,16 +1228,17 @@ Network Status: CONNECTED
                           setShowAutocomplete(e.target.value.length > 0);
                         }}
                         onKeyDown={handleKeyDown}
-                        disabled={isTyping}
+                        disabled={isTyping || _systemCrashed}
                         rows={1}
-                        className="bg-transparent outline-none flex-1 w-full text-cyan-300 caret-cyan-400 min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-gray-700"
+                        className={`bg-transparent outline-none flex-1 w-full ${themeColor} caret-cyan-400 min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-gray-700`}
                         placeholder={isTyping ? "" : "type a command..."}
                         autoFocus
                       />
+                      {!isTyping && !_systemCrashed && <span className={`animate-pulse ${themeColor} ml-1`}>█</span>}
                       
                       {/* Autocomplete dropdown */}
                       {showAutocomplete && getAutocompleteOptions().length > 0 && (
-                        <div className="absolute bottom-full left-0 w-48 mb-1 bg-[#0a0e27]/95 border border-cyan-500/20 rounded-lg overflow-hidden shadow-lg backdrop-blur-md z-50">
+                        <div className={`absolute bottom-full left-0 w-48 mb-1 bg-[#0a0e27]/95 border ${themeBorder} rounded-lg overflow-hidden shadow-lg backdrop-blur-md z-50`}>
                           {getAutocompleteOptions().slice(0, 7).map((option, idx) => (
                             <div
                               key={idx}
@@ -1089,7 +1248,7 @@ Network Status: CONNECTED
                                 setInput(parts.join(" ") + " ");
                                 setShowAutocomplete(false);
                               }}
-                              className="px-3 py-1.5 text-cyan-300 text-xs hover:bg-cyan-400/10 cursor-pointer transition border-b border-cyan-500/5 last:border-b-0"
+                              className={`px-3 py-1.5 ${themeColor} text-xs hover:bg-white/5 cursor-pointer transition border-b ${themeBorder} last:border-b-0`}
                             >
                               {option}
                             </div>
@@ -1110,11 +1269,11 @@ Network Status: CONNECTED
                 © {new Date().getFullYear()} AndSoft
               </span>
               <span className="text-gray-800 text-xs">·</span>
-              <a href="#" className="text-gray-600 hover:text-cyan-400 text-xs transition-colors duration-200">
+              <a href="#" className={`text-gray-600 hover:${themeColor} text-xs transition-colors duration-200`}>
                 Privacy
               </a>
               <span className="text-gray-800 text-xs">·</span>
-              <a href="#" className="text-gray-600 hover:text-cyan-400 text-xs transition-colors duration-200">
+              <a href="#" className={`text-gray-600 hover:${themeColor} text-xs transition-colors duration-200`}>
                 Terms
               </a>
             </div>
@@ -1149,29 +1308,29 @@ Network Status: CONNECTED
               setShowFloatingTerminal(true);
               setShowTerminal(false);
             }}
-            className="fixed bottom-8 right-8 p-3 rounded-full bg-cyan-500/20 border border-cyan-500/50 hover:bg-cyan-500/30 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] z-50"
+            className={`fixed bottom-8 right-8 p-3 rounded-full ${themeBg} border ${themeBorder} hover:bg-white/10 transition-all duration-300 shadow-lg z-50`}
             title="Minimize Terminal"
           >
-            <Terminal size={20} className="text-cyan-400" />
+            <Terminal size={20} className={themeColor} />
           </button>
         )}
 
         {/* Floating Terminal Window */}
         {showFloatingTerminal && (
-          <div className="fixed bottom-8 right-8 w-80 bg-[#0a0e27]/95 border border-cyan-500/20 rounded-lg shadow-xl backdrop-blur-md z-50">
-            <div className="flex justify-between items-center p-3 border-b border-cyan-500/10">
-              <span className="text-cyan-400 text-xs font-mono">Terminal</span>
+          <div className={`fixed bottom-8 right-8 w-80 bg-[#0a0e27]/95 border ${themeBorder} rounded-lg shadow-xl backdrop-blur-md z-50`}>
+            <div className={`flex justify-between items-center p-3 border-b ${themeBorder}`}>
+              <span className={`${themeColor} text-xs font-mono`}>Terminal</span>
               <button
                 onClick={() => {
                   setShowFloatingTerminal(false);
                   setShowTerminal(true);
                 }}
-                className="text-cyan-500 hover:text-cyan-300 transition"
+                className={`${themeColor}/60 hover:${themeColor} transition`}
               >
                 ⛶
               </button>
             </div>
-            <div className="h-40 bg-[#050816] overflow-y-auto text-cyan-300 text-xs font-mono p-3 space-y-1">
+            <div className={`h-40 bg-[#050816] overflow-y-auto ${themeBright} text-xs font-mono p-3 space-y-1`}>
               {history.slice(-5).map((line, i) => (
                 <div key={i} className="text-gray-500">{line.text.substring(0, 40)}{line.text.length > 40 ? '...' : ''}</div>
               ))}
