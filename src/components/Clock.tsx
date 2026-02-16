@@ -11,7 +11,7 @@ export default function Clock() {
   }, []);
 
   return (
-    <div className="text-cyan-400 text-sm font-mono">
+    <div className="text-cyan-400/70 text-xs font-mono">
       {time}
     </div>
   );

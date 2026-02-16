@@ -1,9 +1,11 @@
-import { Facebook, Twitter, Linkedin } from 'lucide-react';
+import { Facebook, Twitter, Linkedin, Github, Mail, MapPin, Phone, Terminal, Activity, Shield, Zap, Server } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import Clock from './Clock';
 
 export default function Footer() {
-  const [latency, setLatency] = useState(12);
+  const [cpu, setCpu] = useState(12);
+  const [ram, setRam] = useState(38);
+  const [uptime, setUptime] = useState(0);
   const [access, setAccess] = useState(false);
   const [systemId] = useState(() => Math.floor(Math.random()*9999));
   const [history, setHistory] = useState<Array<{ text: string; type: "input" | "output" | "error" | "system" }>>([
@@ -18,17 +20,18 @@ export default function Footer() {
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [isTyping, setIsTyping] = useState(false);
   const [awaitingChoice, setAwaitingChoice] = useState(false);
+  const [showTerminal, setShowTerminal] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const historyRef = useRef<HTMLDivElement | null>(null);
 
   const termHeight =
     termSize === "small"
-      ? "h-[120px]"
+      ? "h-[150px]"
       : termSize === "large"
-      ? "h-[300px]"
+      ? "h-[340px]"
       : termSize === "full"
-      ? "h-[420px]"
-      : "h-[180px]";
+      ? "h-[480px]"
+      : "h-[220px]";
 
   const fileSystem = {
     "/": ["home"],
@@ -205,6 +208,8 @@ sudo       system admin commands`,
 
     echo: (args: string[]): string => args.join(" "),
 
+    clear: (): string => "__CLEAR__",
+
     sudo: async (args: string[]): Promise<string> => {
       const sub = args.join(" ");
 
@@ -239,7 +244,36 @@ Reading package lists...  Done`);
       return "sudo: command not found";
     },
 
-    clear: () => "__CLEAR__"
+    tree: (): string => `
+/
+└── home
+    └── guest
+        ├── about.txt
+        ├── contact.md
+        ├── system.log
+        └── projects
+            ├── project1.txt
+            └── project2.txt
+`,
+
+    neofetch: (): string => `
+AndSoft OS v1.0
+─────────────────
+Kernel: 6.1.0 x86_64
+CPU: ${cpu}%
+RAM: ${ram}%
+Uptime: ${uptime}s
+Node: AX-${systemId}
+Status: ONLINE
+`,
+
+    scan: async (): Promise<string> => {
+      await typeText("Scanning network...");
+      await typeText("Node detected: CORE-AX");
+      await typeText("Security: ACTIVE");
+      await typeText("Threat level: NONE");
+      return "";
+    },
   };
 
   const getAutocompleteOptions = (): string[] => {
@@ -249,12 +283,10 @@ Reading package lists...  Done`);
     const parts = trimmed.split(" ");
     const lastPart = parts[parts.length - 1];
 
-    // Command completion
     if (parts.length === 1) {
       return Object.keys(commands).filter(cmd => cmd.startsWith(lastPart));
     }
 
-    // Directory/file completion
     const items = fileSystem[currentDir as keyof typeof fileSystem] || [];
     return items.filter((item: string) => item.startsWith(lastPart));
   };
@@ -269,7 +301,6 @@ Reading package lists...  Done`);
   };
 
   const handleCommand = async (cmd: string): Promise<void> => {
-    // Handle choice input
     if (awaitingChoice) {
       if (cmd === "1") {
         setHistory(prev => [
@@ -278,17 +309,11 @@ Reading package lists...  Done`);
         ]);
         setHistory(prev => [
           ...prev,
-          {
-            text: "Welcome to fsociety.",
-            type: "output"
-          }
+          { text: "Welcome to fsociety.", type: "output" }
         ]);
         setHistory(prev => [
           ...prev,
-          {
-            text: "__SHOW_FSOCIETY__",
-            type: "system"
-          }
+          { text: "__SHOW_FSOCIETY__", type: "system" }
         ]);
       } else {
         setHistory(prev => [
@@ -297,17 +322,11 @@ Reading package lists...  Done`);
         ]);
         setHistory(prev => [
           ...prev,
-          {
-            text: "You are a loser.",
-            type: "error"
-          }
+          { text: "You are a loser.", type: "error" }
         ]);
         setHistory(prev => [
           ...prev,
-          {
-            text: "__SHOW_LOSER__",
-            type: "system"
-          }
+          { text: "__SHOW_LOSER__", type: "system" }
         ]);
       }
 
@@ -321,7 +340,6 @@ Reading package lists...  Done`);
 
     if (!cmd.trim()) return;
 
-    // Add to command history
     setCommandHistory(prev => [cmd, ...prev]);
 
     setHistory(prev => [
@@ -381,9 +399,10 @@ Reading package lists...  Done`);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setLatency(Math.floor(Math.random() * 20) + 5);
+      setCpu(Math.floor(Math.random() * 40) + 5);
+      setRam(Math.floor(Math.random() * 60) + 20);
+      setUptime(prev => prev + 1);
     }, 2000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -397,11 +416,9 @@ Reading package lists...  Done`);
   useEffect(() => {
     const el = historyRef.current;
     if (!el) return;
-
     requestAnimationFrame(() => {
       el.scrollTop = el.scrollHeight;
     });
-
   }, [history]);
 
   const handleAccess = () => {
@@ -409,256 +426,282 @@ Reading package lists...  Done`);
     setTimeout(() => setAccess(false), 2000);
   };
 
+  const statusItems = [
+    { label: "NETWORK", value: "ONLINE", color: "text-green-400", icon: <Activity size={14} /> },
+    { label: "CPU", value: `${cpu}%`, color: "text-yellow-400", icon: <Zap size={14} /> },
+    { label: "RAM", value: `${ram}%`, color: "text-purple-400", icon: <Server size={14} /> },
+    { label: "UPTIME", value: `${uptime}s`, color: "text-green-400", icon: <Shield size={14} /> },
+  ];
+
   return (
-    <footer className="relative bg-black/50 backdrop-blur-md border-t border-cyan-500/20 py-4 md:py-6 overflow-hidden">
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute w-64 h-64 md:w-96 md:h-96 bg-cyan-400 blur-3xl rounded-full top-0 left-1/4 animate-pulse"></div>
-        <div className="absolute w-64 h-64 md:w-96 md:h-96 bg-blue-400 blur-3xl rounded-full bottom-0 right-1/4 animate-pulse"></div>
-      </div>
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
-        {/* AndSoft Section */}
-        <div className="mb-4 md:mb-6">
-          <div className="max-w-sm">
-            <div className="text-2xl font-bold text-white mb-4 relative inline-block group cursor-pointer">
-              <span className="text-cyan-400 group-hover:text-cyan-300 transition">And</span>
-              <span className="group-hover:text-cyan-100 transition">Soft</span>
-              <div className="absolute inset-0 bg-cyan-400 opacity-0 group-hover:opacity-20 blur-xl transition pointer-events-none"></div>
-            </div>
-          </div>
+    <footer className="relative overflow-hidden">
+      {/* Top gradient border */}
+      <div className="h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+
+      <div className="relative bg-[#050816]/80 backdrop-blur-xl pt-10 pb-6">
+        {/* Ambient glow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute w-[600px] h-[600px] bg-cyan-500/[0.04] blur-[150px] rounded-full -top-60 left-1/4"></div>
+          <div className="absolute w-[400px] h-[400px] bg-blue-500/[0.03] blur-[120px] rounded-full -bottom-40 right-1/4"></div>
         </div>
 
-        {/* Console + System Status Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-2">
-          {/* Console */}
-          <div className="md:border-l md:border-cyan-500/10 md:pl-8">
-            <h4 className="text-white font-semibold mb-4">Console</h4>
-            <div className={`
-              w-full
-              md:w-[500px]
-              bg-black/40 
-              border border-cyan-500/20 
-              rounded-lg 
-              p-4 
-              font-mono 
-              text-xs md:text-sm
-              ${termHeight}
-              transition-all duration-300
-              flex flex-col
-              min-w-[280px]
-              max-w-full
-            `}>
-              <div className="flex justify-between items-center mb-2">
-                <div className="text-gray-400 text-xs">
-                  terminal
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setTermSize("small")}
-                    className="text-xs px-2 py-0.5 border border-cyan-500/30 rounded hover:bg-cyan-500/10 text-gray-400 hover:text-cyan-400 transition"
-                  >
-                    −
-                  </button>
-                  <button
-                    onClick={() => setTermSize(termSize === "full" ? "normal" : "full")}
-                    className="text-xs px-2 py-0.5 border border-cyan-500/30 rounded hover:bg-cyan-500/10 text-gray-400 hover:text-cyan-400 transition"
-                  >
-                    □
-                  </button>
-                  <button
-                    onClick={() => setTermSize("large")}
-                    className="text-xs px-2 py-0.5 border border-cyan-500/30 rounded hover:bg-cyan-500/10 text-gray-400 hover:text-cyan-400 transition"
-                  >
-                    +
-                  </button>
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
+
+          {/* ─── Top: Brand + Contact + System ─── */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-10">
+
+            {/* Brand */}
+            <div className="md:col-span-5">
+              <div className="mb-4">
+                <div className="text-3xl font-bold tracking-tight relative inline-block group cursor-pointer">
+                  <span className="text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300">And</span>
+                  <span className="text-white/90 group-hover:text-white transition">Soft</span>
+                  <div className="absolute -inset-2 bg-cyan-400/0 group-hover:bg-cyan-400/5 blur-xl rounded-full transition-all duration-500 pointer-events-none"></div>
                 </div>
               </div>
+              <p className="text-gray-400/70 text-sm leading-relaxed max-w-sm mb-6">
+                Building the future of digital infrastructure. Secure, scalable, and intelligent solutions for the modern world.
+              </p>
+              {/* Social icons */}
+              <div className="flex items-center gap-3">
+                {[
+                  { icon: <Github size={16} />, href: "#" },
+                  { icon: <Linkedin size={16} />, href: "#" },
+                  { icon: <Twitter size={16} />, href: "#" },
+                  { icon: <Facebook size={16} />, href: "#" },
+                ].map((social, i) => (
+                  <a
+                    key={i}
+                    href={social.href}
+                    className="w-9 h-9 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-gray-500 hover:text-cyan-400 hover:bg-cyan-400/[0.08] hover:border-cyan-500/30 hover:shadow-[0_0_20px_rgba(6,182,212,0.1)] transition-all duration-300"
+                  >
+                    {social.icon}
+                  </a>
+                ))}
+              </div>
+            </div>
 
-              <div
-                ref={historyRef}
-                className="
-                  flex-1
-                  overflow-y-auto
-                  overflow-x-hidden
-                  space-y-1
-                  break-words
-                  whitespace-pre-wrap
-                "
-              >
-                {history.map((line, i) => {
-                  // Handle image reveals
-                  if (line.text === "__SHOW_FSOCIETY__") {
-                    return (
-                      <img
-                        key={i}
-                        src="/fsociety.jpg"
-                        alt="fsociety"
-                        className="w-40 mt-2"
-                      />
-                    );
-                  }
+            {/* Contact */}
+            <div className="md:col-span-3">
+              <h4 className="text-white/90 font-semibold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-cyan-400"></div>
+                Contact
+              </h4>
+              <ul className="space-y-3.5">
+                <li className="flex items-center gap-3 text-gray-400/70 text-sm group cursor-default hover:text-gray-300 transition-colors">
+                  <div className="p-1.5 rounded-lg bg-cyan-400/[0.06] border border-cyan-500/10 group-hover:border-cyan-500/25 transition">
+                    <Phone size={12} className="text-cyan-400/60" />
+                  </div>
+                  +976 99212999
+                </li>
+                <li className="flex items-center gap-3 text-gray-400/70 text-sm group cursor-default hover:text-gray-300 transition-colors">
+                  <div className="p-1.5 rounded-lg bg-cyan-400/[0.06] border border-cyan-500/10 group-hover:border-cyan-500/25 transition">
+                    <Mail size={12} className="text-cyan-400/60" />
+                  </div>
+                  info@andsoft.mn
+                </li>
+                <li className="flex items-center gap-3 text-gray-400/70 text-sm group cursor-default hover:text-gray-300 transition-colors">
+                  <div className="p-1.5 rounded-lg bg-cyan-400/[0.06] border border-cyan-500/10 group-hover:border-cyan-500/25 transition">
+                    <MapPin size={12} className="text-cyan-400/60" />
+                  </div>
+                  Ulaanbaatar, Mongolia
+                </li>
+              </ul>
+            </div>
 
-                  if (line.text === "__SHOW_LOSER__") {
-                    return (
-                      <img
-                        key={i}
-                        src="/loser.jpg"
-                        alt="loser"
-                        className="w-40 mt-2"
-                      />
-                    );
-                  }
-
-                  let baseColor = "text-green-400";
-                  if (line.type === "input") baseColor = "text-cyan-400";
-                  if (line.type === "error") baseColor = "text-red-400";
-                  if (line.type === "system") baseColor = "text-gray-400";
-
-                  // Parse color codes in text
-                  const renderColoredText = (text: string) => {
-                    const parts = text.split(/(\[BLUE\].*?\[\/BLUE\]|\[GRAY\].*?\[\/GRAY\])/);
-                    return parts.map((part: string, idx: number) => {
-                      if (part.startsWith("[BLUE]")) {
-                        const content = part.replace(/\[BLUE\]|\[\/BLUE\]/g, "");
-                        return <span key={idx} className="text-blue-400">{content}</span>;
-                      } else if (part.startsWith("[GRAY]")) {
-                        const content = part.replace(/\[GRAY\]|\[\/GRAY\]/g, "");
-                        return <span key={idx} className="text-gray-400">{content}</span>;
-                      }
-                      return part;
-                    });
-                  };
-
-                  return (
-                    <div key={i} className={`${baseColor} break-words whitespace-pre-wrap`}>
-                      {renderColoredText(line.text)}
+            {/* System Status */}
+            <div className="md:col-span-4" onClick={handleAccess}>
+              <h4 className="text-white/90 font-semibold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-green-400"></div>
+                System Status
+              </h4>
+              <div className="grid grid-cols-2 gap-2.5">
+                {statusItems.map((item, i) => (
+                  <div
+                    key={i}
+                    className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 hover:bg-cyan-400/[0.04] hover:border-cyan-500/15 transition-all duration-300 cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <span className={`${item.color} opacity-50 group-hover:opacity-100 transition`}>{item.icon}</span>
+                      <span className="text-gray-600 text-[10px] uppercase tracking-wider font-medium">{item.label}</span>
                     </div>
-                  );
-                })}
+                    <div className={`${item.color} text-xs font-mono font-medium`}>{item.value}</div>
+                  </div>
+                ))}
               </div>
-
-              {/* input line */}
-              <div className="mt-auto flex items-start text-green-400 gap-2 pt-1">
-                <span className="text-green-500 shrink-0 whitespace-nowrap">
-                  guest@andsoft:{currentDir}$
-                </span>
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  disabled={isTyping}
-                  rows={1}
-                  className="
-                    bg-transparent 
-                    outline-none 
-                    flex-1 
-                    text-green-400
-                    caret-green-400
-                    min-w-0
-                    resize-none
-                    overflow-hidden
-                    whitespace-pre-wrap
-                    break-words
-                    disabled:opacity-50
-                    leading-relaxed
-                  "
-                  autoFocus
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* System Status */}
-          <div
-            onClick={handleAccess}
-            className="relative bg-black/30 border border-cyan-500/20 p-4 md:p-6 rounded-xl hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(34,211,238,0.15)] transition-all duration-300 overflow-hidden group cursor-pointer"
-          >
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none">
-              <div className="absolute w-full h-[2px] bg-cyan-400 animate-[scan_2s_linear_infinite]"></div>
-            </div>
-            <h4 className="text-white font-semibold mb-4 relative z-10">System Status</h4>
-
-            <div className="space-y-3 text-xs md:text-sm font-mono">
-
-              {/* Online indicator */}
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
-                </span>
-                <span className="text-green-400">ONLINE</span>
-              </div>
-
-              {/* latency */}
-              <div className="text-gray-400">
-                LATENCY: {latency}ms
-              </div>
-
-              {/* version */}
-              <div className="text-gray-400">
-                VERSION: v1.0.3
-              </div>
-
-              {/* uptime */}
-              <div className="text-gray-400">
-                UPTIME: {Math.floor(Math.random()*99)}%
-              </div>
-
-              {/* random id */}
-              <div className="text-cyan-400">
-                ID: AX-{systemId}
-              </div>
-
               {access && (
-                <div className="text-cyan-400 text-xs font-mono mt-2 animate-pulse">
-                  ACCESS GRANTED
+                <div className="text-cyan-400 text-xs font-mono mt-3 animate-pulse text-center tracking-wider">
+                  ● ACCESS GRANTED
                 </div>
               )}
-
             </div>
           </div>
-        </div>
 
-        <div className="border-t border-cyan-500/20 pt-2 flex flex-col gap-2 md:flex-row md:justify-between md:items-center md:gap-4">
-          <div className="text-gray-400 text-xs md:text-sm mb-4 md:mb-0">
-            © {new Date().getFullYear()} AndSoft. All rights reserved.
-          </div>
-          <div className="flex flex-wrap items-center gap-4 md:gap-6 justify-center md:justify-end md:flex-nowrap">
-            <a href="#" className="relative text-gray-400 hover:text-cyan-400 text-xs md:text-sm group transition-colors">
-              Privacy Policy
-              <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-cyan-400 transition-all group-hover:w-full"></span>
-            </a>
-            <a href="#" className="relative text-gray-400 hover:text-cyan-400 text-xs md:text-sm group transition-colors">
-              Terms of Service
-              <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-cyan-400 transition-all group-hover:w-full"></span>
-            </a>
-            <div className="flex space-x-3 ml-4">
-              <a href="#" className="text-gray-400 hover:text-cyan-400 hover:scale-110 transition-all duration-300">
-                <Linkedin size={18} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-cyan-400 hover:scale-110 transition-all duration-300">
-                <Twitter size={18} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-cyan-400 hover:scale-110 transition-all duration-300">
-                <Facebook size={18} />
-              </a>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
+          {/* ─── Terminal (collapsible) ─── */}
+          <div className="mb-8">
+            <button
+              onClick={() => setShowTerminal(!showTerminal)}
+              className="flex items-center gap-2.5 text-sm text-gray-500 hover:text-cyan-400 transition-colors duration-200 mb-4 group"
+            >
+              <div className="p-1.5 rounded-lg bg-cyan-400/[0.06] border border-cyan-500/10 group-hover:border-cyan-500/30 transition">
+                <Terminal size={13} className="text-cyan-500/50 group-hover:text-cyan-400 transition" />
+              </div>
+              <span className="font-mono text-xs uppercase tracking-widest">
+                {showTerminal ? "Close Terminal" : "Open Terminal"}
               </span>
-              <Clock />
-            </div>
-            <span className="text-gray-400 text-sm">EN</span>
-          </div>
-        </div>
+              <span className={`text-[10px] text-cyan-500/40 transition-transform duration-300 ${showTerminal ? "rotate-180" : ""}`}>▼</span>
+            </button>
 
-        <div className="mt-2 pt-2 border-t border-cyan-500/10 flex justify-center">
-          <div className="text-green-400 font-mono text-xs animate-pulse tracking-widest">
-            SYSTEM ONLINE ● ANDSOFT v1.0
-            <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent mt-2 opacity-50"></div>
+            <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showTerminal ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className={`
+                w-full
+                max-w-2xl
+                bg-[#0a0e27]/90
+                border border-cyan-500/10
+                rounded-2xl
+                p-5
+                font-mono
+                text-xs md:text-sm
+                ${termHeight}
+                transition-all duration-300
+                flex flex-col
+                backdrop-blur-md
+                shadow-[0_0_60px_rgba(6,182,212,0.03)]
+              `}>
+                {/* Terminal titlebar */}
+                <div className="flex justify-between items-center mb-3 pb-3 border-b border-white/[0.04]">
+                  <div className="flex items-center gap-3">
+                    <div className="flex gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/70 hover:bg-red-500 transition cursor-pointer"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70 hover:bg-yellow-500 transition cursor-pointer"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/70 hover:bg-green-500 transition cursor-pointer"></div>
+                    </div>
+                    <div className="flex items-center gap-1.5 ml-1">
+                      <div className="w-1 h-1 rounded-full bg-cyan-400/40 animate-pulse"></div>
+                      <span className="text-gray-600 text-[10px] uppercase tracking-widest">andsoft — bash</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setTermSize("small")}
+                      className="text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-cyan-400/10 text-gray-600 hover:text-cyan-400 transition flex items-center justify-center"
+                    >
+                      −
+                    </button>
+                    <button
+                      onClick={() => setTermSize(termSize === "full" ? "normal" : "full")}
+                      className="text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-cyan-400/10 text-gray-600 hover:text-cyan-400 transition flex items-center justify-center"
+                    >
+                      □
+                    </button>
+                    <button
+                      onClick={() => setTermSize("large")}
+                      className="text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-cyan-400/10 text-gray-600 hover:text-cyan-400 transition flex items-center justify-center"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Terminal output */}
+                <div
+                  ref={historyRef}
+                  className="flex-1 overflow-y-auto overflow-x-hidden space-y-0.5 break-words whitespace-pre-wrap pr-1"
+                  style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(6,182,212,0.15) transparent' }}
+                >
+                  {history.map((line, i) => {
+                    if (line.text === "__SHOW_FSOCIETY__") {
+                      return (
+                        <img key={i} src="/fsociety.jpg" alt="fsociety" className="w-40 mt-2 rounded-lg border border-cyan-500/10" />
+                      );
+                    }
+                    if (line.text === "__SHOW_LOSER__") {
+                      return (
+                        <img key={i} src="/loser.jpg" alt="loser" className="w-40 mt-2 rounded-lg border border-red-500/10" />
+                      );
+                    }
+
+                    let baseColor = "text-cyan-300/90";
+                    if (line.type === "input") baseColor = "text-gray-400";
+                    if (line.type === "error") baseColor = "text-red-400/80";
+                    if (line.type === "system") baseColor = "text-gray-600";
+
+                    const renderColoredText = (text: string) => {
+                      const parts = text.split(/(\[BLUE\].*?\[\/BLUE\]|\[GRAY\].*?\[\/GRAY\])/);
+                      return parts.map((part: string, idx: number) => {
+                        if (part.startsWith("[BLUE]")) {
+                          const content = part.replace(/\[BLUE\]|\[\/BLUE\]/g, "");
+                          return <span key={idx} className="text-cyan-400">{content}</span>;
+                        } else if (part.startsWith("[GRAY]")) {
+                          const content = part.replace(/\[GRAY\]|\[\/GRAY\]/g, "");
+                          return <span key={idx} className="text-gray-500">{content}</span>;
+                        }
+                        return part;
+                      });
+                    };
+
+                    return (
+                      <div key={i} className={`${baseColor} break-words whitespace-pre-wrap leading-relaxed`}>
+                        {renderColoredText(line.text)}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Terminal input */}
+                <div className="mt-auto flex items-start gap-2 pt-3 border-t border-white/[0.04]">
+                  <span className="text-cyan-500/70 shrink-0 whitespace-nowrap text-xs">
+                    guest@andsoft:{currentDir}$
+                  </span>
+                  <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={isTyping}
+                    rows={1}
+                    className="bg-transparent outline-none flex-1 text-cyan-300 caret-cyan-400 min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-gray-700"
+                    placeholder={isTyping ? "" : "type a command..."}
+                    autoFocus
+                  />
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* ─── Bottom Bar ─── */}
+          <div className="border-t border-white/[0.04] pt-5 flex flex-col gap-4 md:flex-row md:justify-between md:items-center">
+            <div className="flex items-center gap-3">
+              <span className="text-gray-600 text-xs">
+                © {new Date().getFullYear()} AndSoft
+              </span>
+              <span className="text-gray-800 text-xs">·</span>
+              <a href="#" className="text-gray-600 hover:text-cyan-400 text-xs transition-colors duration-200">
+                Privacy
+              </a>
+              <span className="text-gray-800 text-xs">·</span>
+              <a href="#" className="text-gray-600 hover:text-cyan-400 text-xs transition-colors duration-200">
+                Terms
+              </a>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400"></span>
+                </span>
+                <span className="text-gray-600 text-xs font-mono">v1.0.3</span>
+              </div>
+              <div className="h-3 w-[1px] bg-white/[0.06]"></div>
+              <Clock />
+              <div className="h-3 w-[1px] bg-white/[0.06]"></div>
+              <span className="text-gray-600 text-xs font-medium">EN</span>
+            </div>
+          </div>
+
+          {/* Bottom accent line */}
+          <div className="mt-4 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent"></div>
         </div>
       </div>
     </footer>
