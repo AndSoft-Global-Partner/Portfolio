@@ -8,6 +8,10 @@ export default function Footer() {
   const [uptime, setUptime] = useState(0);
   const [access, setAccess] = useState(false);
   const [systemId] = useState(() => Math.floor(Math.random()*9999));
+  const [visitors] = useState(Math.floor(Math.random()*5000));
+  const [loginUser, setLoginUser] = useState("");
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [bootSequenceShown, setBootSequenceShown] = useState(false);
   const [history, setHistory] = useState<Array<{ text: string; type: "input" | "output" | "error" | "system" }>>([
     { text: "System initialized.", type: "system" },
     { text: "Type 'help' to see available commands.", type: "system" }
@@ -23,6 +27,7 @@ export default function Footer() {
   const [showTerminal, setShowTerminal] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const historyRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const termHeight =
     termSize === "small"
@@ -114,6 +119,11 @@ What do you choose to be.`;
     for (let i = 0; i < text.length; i++) {
       current += text[i];
 
+      // Play typing sound every 3 characters
+      if (i % 3 === 0) {
+        playTypeSound();
+      }
+
       setHistory(prev => {
         const newHistory = [...prev];
 
@@ -153,7 +163,12 @@ date       system date
 uname      system info
 clear      clear terminal
 echo       print text
-sudo       system admin commands`,
+sudo       system admin commands
+clock      show time
+login      login to system
+hack       inject payload
+netmap     show network map
+andsoft    secret command (easter egg)`,
 
     ls: (): string => {
       const items = fileSystem[currentDir as keyof typeof fileSystem];
@@ -274,6 +289,44 @@ Status: ONLINE
       await typeText("Threat level: NONE");
       return "";
     },
+
+    clock: (): string => new Date().toLocaleTimeString(),
+
+    login: async (args: string[]): Promise<string> => {
+      const user = args[0] || "root";
+      if (user === "root") {
+        setLoginUser("root");
+        await typeText("Password: ");
+        setAwaitingChoice(true);
+        return "";
+      }
+      return `login: user '${user}' does not exist`;
+    },
+
+    andsoft: async (): Promise<string> => {
+      await typeText("Welcome, operator.");
+      await typeText("You have root access.");
+      await typeText("System decrypted.");
+      return "";
+    },
+
+    hack: async (): Promise<string> => {
+      for (let i = 0; i <= 100; i += 10) {
+        await typeText(`Injecting payload... ${i}%`);
+      }
+      await typeText("Access granted.");
+      return "";
+    },
+
+    netmap: (): string => `
+   USER
+    │
+  ANDSOFT
+  /     \\
+ NODE1  NODE2
+
+Network Status: CONNECTED
+`,
   };
 
   const getAutocompleteOptions = (): string[] => {
@@ -302,6 +355,22 @@ Status: ONLINE
 
   const handleCommand = async (cmd: string): Promise<void> => {
     if (awaitingChoice) {
+      // Handle login password
+      if (loginUser === "root") {
+        setHistory(prev => [
+          ...prev,
+          { text: "guest@andsoft:~$ Password: ••••", type: "input" }
+        ]);
+        setHistory(prev => [
+          ...prev,
+          { text: "Welcome to AndSoft, root.", type: "system" }
+        ]);
+        setLoginUser("");
+        setAwaitingChoice(false);
+        return;
+      }
+
+      // Handle fsociety choice (1 or 0)
       if (cmd === "1") {
         setHistory(prev => [
           ...prev,
@@ -421,9 +490,116 @@ Status: ONLINE
     });
   }, [history]);
 
+  // Matrix rain animation
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+    const charCount = 50;
+    const drops: number[] = [];
+
+    for (let i = 0; i < charCount; i++) {
+      drops[i] = Math.random() * canvas.height;
+    }
+
+    const draw = () => {
+      ctx.fillStyle = "rgba(5, 8, 22, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#00d4ff";
+      ctx.font = "10px monospace";
+
+      for (let i = 0; i < charCount; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const x = (i * (canvas.width / charCount)) + Math.random() * 20;
+        
+        ctx.fillText(char, x, drops[i]);
+
+        if (drops[i] > canvas.height) {
+          drops[i] = 0;
+        }
+
+        drops[i] += Math.random() * 3 + 1;
+      }
+
+      requestAnimationFrame(draw);
+    };
+
+    const handleResize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+
+    window.addEventListener('resize', handleResize);
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Boot sequence on first terminal open
+  useEffect(() => {
+    if (showTerminal && !bootSequenceShown) {
+      setBootSequenceShown(true);
+      setHistory(prev => [
+        ...prev,
+        { text: "[ OK ] Initializing kernel...", type: "system" },
+        { text: "[ OK ] Loading modules...", type: "system" },
+        { text: "[ OK ] Connecting to network...", type: "system" },
+        { text: "[ OK ] AndSoft system ready.", type: "system" }
+      ]);
+    }
+  }, [showTerminal, bootSequenceShown]);
+
   const handleAccess = () => {
     setAccess(true);
+    playAccessSound();
     setTimeout(() => setAccess(false), 2000);
+  };
+
+  const handleDragStart = () => {
+    // Terminal is visually draggable (cursor feedback on titlebar)
+    // Full drag implementation can be extended using react-rnd if needed
+  };
+
+  // Sound effects using Web Audio API
+  const playSound = (frequency: number, duration: number, type: 'sine' | 'square' | 'triangle' = 'sine') => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = frequency;
+      oscillator.type = type;
+
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + duration);
+    } catch (e) {
+      // Audio not supported
+    }
+  };
+
+  const playTypeSound = () => {
+    playSound(800 + Math.random() * 200, 0.05, 'square');
+  };
+
+  const playAccessSound = () => {
+    playSound(1200, 0.1, 'sine');
+    setTimeout(() => playSound(1400, 0.1, 'sine'), 100);
   };
 
   const statusItems = [
@@ -439,6 +615,13 @@ Status: ONLINE
       <div className="h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
 
       <div className="relative bg-[#050816]/80 backdrop-blur-xl pt-10 pb-6">
+        {/* Matrix rain effect */}
+        <canvas 
+          ref={canvasRef}
+          className="absolute inset-0 opacity-5 pointer-events-none"
+          style={{ display: 'block' }}
+        />
+        
         {/* Ambient glow */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute w-[600px] h-[600px] bg-cyan-500/[0.04] blur-[150px] rounded-full -top-60 left-1/4"></div>
@@ -540,7 +723,10 @@ Status: ONLINE
           {/* ─── Terminal (collapsible) ─── */}
           <div className="mb-8">
             <button
-              onClick={() => setShowTerminal(!showTerminal)}
+              onClick={() => {
+                setShowTerminal(!showTerminal);
+                playSound(600, 0.1, 'sine');
+              }}
               className="flex items-center gap-2.5 text-sm text-gray-500 hover:text-cyan-400 transition-colors duration-200 mb-4 group"
             >
               <div className="p-1.5 rounded-lg bg-cyan-400/[0.06] border border-cyan-500/10 group-hover:border-cyan-500/30 transition">
@@ -569,7 +755,10 @@ Status: ONLINE
                 shadow-[0_0_60px_rgba(6,182,212,0.03)]
               `}>
                 {/* Terminal titlebar */}
-                <div className="flex justify-between items-center mb-3 pb-3 border-b border-white/[0.04]">
+                <div 
+                  className="flex justify-between items-center mb-3 pb-3 border-b border-white/[0.04] cursor-grab active:cursor-grabbing select-none"
+                  onMouseDown={handleDragStart}
+                >
                   <div className="flex items-center gap-3">
                     <div className="flex gap-1.5">
                       <div className="w-2.5 h-2.5 rounded-full bg-red-500/70 hover:bg-red-500 transition cursor-pointer"></div>
@@ -649,21 +838,48 @@ Status: ONLINE
                 </div>
 
                 {/* Terminal input */}
-                <div className="mt-auto flex items-start gap-2 pt-3 border-t border-white/[0.04]">
-                  <span className="text-cyan-500/70 shrink-0 whitespace-nowrap text-xs">
-                    guest@andsoft:{currentDir}$
-                  </span>
-                  <textarea
-                    ref={textareaRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    disabled={isTyping}
-                    rows={1}
-                    className="bg-transparent outline-none flex-1 text-cyan-300 caret-cyan-400 min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-gray-700"
-                    placeholder={isTyping ? "" : "type a command..."}
-                    autoFocus
-                  />
+                <div className="mt-auto pt-3 border-t border-white/[0.04]">
+                  <div className="flex items-start gap-2 relative">
+                    <span className="text-cyan-500/70 shrink-0 whitespace-nowrap text-xs">
+                      guest@andsoft:{currentDir}$
+                    </span>
+                    <div className="flex-1 relative">
+                      <textarea
+                        ref={textareaRef}
+                        value={input}
+                        onChange={(e) => {
+                          setInput(e.target.value);
+                          setShowAutocomplete(e.target.value.length > 0);
+                        }}
+                        onKeyDown={handleKeyDown}
+                        disabled={isTyping}
+                        rows={1}
+                        className="bg-transparent outline-none flex-1 w-full text-cyan-300 caret-cyan-400 min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-gray-700"
+                        placeholder={isTyping ? "" : "type a command..."}
+                        autoFocus
+                      />
+                      
+                      {/* Autocomplete dropdown */}
+                      {showAutocomplete && getAutocompleteOptions().length > 0 && (
+                        <div className="absolute bottom-full left-0 w-48 mb-1 bg-[#0a0e27]/95 border border-cyan-500/20 rounded-lg overflow-hidden shadow-lg backdrop-blur-md z-50">
+                          {getAutocompleteOptions().slice(0, 7).map((option, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => {
+                                const parts = input.trim().split(" ");
+                                parts[parts.length - 1] = option;
+                                setInput(parts.join(" ") + " ");
+                                setShowAutocomplete(false);
+                              }}
+                              className="px-3 py-1.5 text-cyan-300 text-xs hover:bg-cyan-400/10 cursor-pointer transition border-b border-cyan-500/5 last:border-b-0"
+                            >
+                              {option}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -686,6 +902,10 @@ Status: ONLINE
             </div>
 
             <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 text-xs font-mono">Visitors: {visitors.toLocaleString()}</span>
+              </div>
+              <div className="h-3 w-[1px] bg-white/[0.06]"></div>
               <div className="flex items-center gap-2">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60"></span>
