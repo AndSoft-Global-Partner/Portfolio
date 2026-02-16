@@ -84,6 +84,27 @@ export default function Footer() {
     red: "bg-red-400/[0.06]"
   }[_theme];
 
+  const themeHover = {
+    cyan: "hover:text-cyan-400",
+    green: "hover:text-green-400",
+    amber: "hover:text-amber-400",
+    red: "hover:text-red-400"
+  }[_theme];
+
+  const themeBorderHover = {
+    cyan: "group-hover:border-cyan-500/30",
+    green: "group-hover:border-green-500/30",
+    amber: "group-hover:border-amber-500/30",
+    red: "group-hover:border-red-500/30"
+  }[_theme];
+
+  const themeGlow = {
+    cyan: "shadow-[0_0_25px_rgba(0,255,255,0.15)]",
+    green: "shadow-[0_0_25px_rgba(0,255,0,0.15)]",
+    amber: "shadow-[0_0_25px_rgba(255,191,0,0.15)]",
+    red: "shadow-[0_0_25px_rgba(255,0,0,0.15)]"
+  }[_theme];
+
   const fileSystem = {
     "/": ["home"],
     "/home": ["guest"],
@@ -585,6 +606,7 @@ Network Status: CONNECTED
           { text: `${user}@${activeNode}:~$ Password: ••••`, type: "input" }
         ]);
         setUser("root");
+        _setTheme("red");
         setHistory(prev => [
           ...prev,
           { text: "Welcome to AndSoft, root.", type: "system" }
@@ -804,6 +826,48 @@ Network Status: CONNECTED
       textareaRef.current?.focus();
     }
   }, [showTerminal]);
+
+  // Persist theme to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("term_theme", _theme);
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, [_theme]);
+
+  // Load theme from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("term_theme");
+      if (saved && ["cyan", "green", "amber", "red"].includes(saved)) {
+        _setTheme(saved as any);
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, []);
+
+  // Persist theme to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("term_theme", _theme);
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, [_theme]);
+
+  // Load theme from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("term_theme");
+      if (saved && ["cyan", "green", "amber", "red"].includes(saved)) {
+        _setTheme(saved as any);
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, []);
 
   // Matrix rain animation
   useEffect(() => {
@@ -1103,9 +1167,9 @@ Network Status: CONNECTED
                 setShowTerminal(!showTerminal);
                 playSound(600, 0.1, 'sine');
               }}
-              className={`flex items-center gap-2.5 text-sm text-gray-500 hover:${themeColor} transition-colors duration-200 mb-4 group`}
+              className={`flex items-center gap-2.5 text-sm text-gray-500 ${themeHover} transition-colors duration-200 mb-4 group`}
             >
-              <div className={`p-1.5 rounded-lg ${themeBg} border ${themeBorder} group-hover:border-${_theme}-500/30 transition`}>
+              <div className={`p-1.5 rounded-lg ${themeBg} border ${themeBorder} ${themeBorderHover} transition`}>
                 <Terminal size={13} className={`${themeColor}/50 group-hover:${themeColor} transition`} />
               </div>
               <span className="font-mono text-xs uppercase tracking-widest">
@@ -1128,7 +1192,7 @@ Network Status: CONNECTED
                 transition-all duration-300
                 flex flex-col
                 backdrop-blur-md
-                shadow-[0_0_60px_rgba(6,182,212,0.03)]
+                ${themeGlow}
               `}>
                 {/* Terminal titlebar */}
                 <div 
@@ -1230,7 +1294,7 @@ Network Status: CONNECTED
                         onKeyDown={handleKeyDown}
                         disabled={isTyping || _systemCrashed}
                         rows={1}
-                        className={`bg-transparent outline-none flex-1 w-full ${themeColor} caret-cyan-400 min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-gray-700`}
+                        className={`bg-transparent outline-none flex-1 w-full ${themeColor} caret-current min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-gray-700`}
                         placeholder={isTyping ? "" : "type a command..."}
                         autoFocus
                       />
