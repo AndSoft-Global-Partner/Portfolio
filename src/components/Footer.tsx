@@ -7,11 +7,22 @@ export default function Footer() {
   const [ram, setRam] = useState(38);
   const [uptime, setUptime] = useState(0);
   const [access, setAccess] = useState(false);
-  const [systemId] = useState(() => Math.floor(Math.random()*9999));
+  const [_systemId, _setSystemId] = useState(() => Math.floor(Math.random()*9999));
   const [visitors] = useState(Math.floor(Math.random()*5000));
+  const [user, setUser] = useState<"guest" | "root">("guest");
   const [loginUser, setLoginUser] = useState("");
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [bootSequenceShown, setBootSequenceShown] = useState(false);
+  const [_theme, _setTheme] = useState<"cyan" | "green" | "amber" | "red">("cyan");
+  const [dynamicFiles, setDynamicFiles] = useState<Record<string, string>>({});
+  const [nanoMode, setNanoMode] = useState(false);
+  const [nanoFile, setNanoFile] = useState("");
+  const [nanoContent, setNanoContent] = useState("");
+  const [showBootScreen, setShowBootScreen] = useState(true);
+  const [showFloatingTerminal, setShowFloatingTerminal] = useState(false);
+  const [activeNode, setActiveNode] = useState("ANDSOFT-CORE");
+  const [_aiOnline, _setAiOnline] = useState(false);
+  const [_systemCrashed, _setSystemCrashed] = useState(false);
   const [history, setHistory] = useState<Array<{ text: string; type: "input" | "output" | "error" | "system" }>>([
     { text: "System initialized.", type: "system" },
     { text: "Type 'help' to see available commands.", type: "system" }
@@ -97,6 +108,19 @@ What do you choose to be.`;
   const isDirectory = (path: string) => fileSystem[path as keyof typeof fileSystem] !== undefined;
   const isFile = (name: string) => fileContents[name as keyof typeof fileContents] !== undefined;
 
+  const progressBar = (percent: number): string => {
+    const filled = Math.floor(percent / 10);
+    return `[${("█".repeat(filled))}${("░".repeat(10 - filled))}] ${percent}%`;
+  };
+
+  const requireRoot = async (): Promise<boolean> => {
+    if (user !== "root") {
+      await typeText("Permission denied.", "error");
+      return false;
+    }
+    return true;
+  };
+
   const resolvePath = (target: string): string => {
     if (target === "/") return "/";
     if (target === "~") return "/home/guest";
@@ -166,9 +190,18 @@ echo       print text
 sudo       system admin commands
 clock      show time
 login      login to system
-hack       inject payload
+hack       inject payload [ROOT]
 netmap     show network map
-andsoft    secret command (easter egg)`,
+andsoft    secret command
+touch      create file
+mkdir      make directory
+rm         remove file [ROOT]
+nano       edit file
+ps         process list
+ai         AI assistant
+connect    connect to node
+theme      change theme color
+crash      crash system [ROOT]`,
 
     ls: (): string => {
       const items = fileSystem[currentDir as keyof typeof fileSystem];
@@ -278,7 +311,7 @@ Kernel: 6.1.0 x86_64
 CPU: ${cpu}%
 RAM: ${ram}%
 Uptime: ${uptime}s
-Node: AX-${systemId}
+Node: AX-${_systemId}
 Status: ONLINE
 `,
 
@@ -293,14 +326,14 @@ Status: ONLINE
     clock: (): string => new Date().toLocaleTimeString(),
 
     login: async (args: string[]): Promise<string> => {
-      const user = args[0] || "root";
-      if (user === "root") {
+      const username = args[0] || "root";
+      if (username === "root") {
         setLoginUser("root");
         await typeText("Password: ");
         setAwaitingChoice(true);
         return "";
       }
-      return `login: user '${user}' does not exist`;
+      return `login: user '${username}' does not exist`;
     },
 
     andsoft: async (): Promise<string> => {
@@ -311,10 +344,12 @@ Status: ONLINE
     },
 
     hack: async (): Promise<string> => {
+      if (!await requireRoot()) return "";
+      
       for (let i = 0; i <= 100; i += 10) {
-        await typeText(`Injecting payload... ${i}%`);
+        await typeText(progressBar(i));
       }
-      await typeText("Access granted.");
+      await typeText("Root exploit successful.");
       return "";
     },
 
@@ -327,6 +362,118 @@ Status: ONLINE
 
 Network Status: CONNECTED
 `,
+
+    touch: (args: string[]): string => {
+      const name = args[0];
+      if (!name) return "usage: touch <filename>";
+      setDynamicFiles(prev => ({ ...prev, [name]: "" }));
+      return `created ${name}`;
+    },
+
+    mkdir: (args: string[]): string => {
+      const name = args[0];
+      if (!name) return "usage: mkdir <dirname>";
+      setDynamicFiles(prev => ({ ...prev, [name + "/"]: "" }));
+      return `directory created: ${name}`;
+    },
+
+    rm: async (args: string[]): Promise<string> => {
+      if (!await requireRoot()) return "";
+      const name = args[0];
+      if (!name) return "usage: rm <file>";
+      setDynamicFiles(prev => {
+        const newFiles = { ...prev };
+        delete newFiles[name];
+        return newFiles;
+      });
+      return `removed ${name}`;
+    },
+
+    nano: async (args: string[]): Promise<string> => {
+      const file = args[0];
+      if (!file) {
+        await typeText("usage: nano <filename>");
+        return "";
+      }
+      setNanoFile(file);
+      setNanoMode(true);
+      setNanoContent(dynamicFiles[file] || "");
+      return "";
+    },
+
+    ps: (): string => {
+      return `PID   NAME
+102   andsoft-core
+211   network-daemon
+334   security-module
+445   ai-monitor
+556   firewall-service`;
+    },
+
+    ai: async (): Promise<string> => {
+      await typeText("AI CORE INITIALIZING...");
+      _setAiOnline(true);
+      await typeText("AI CORE ONLINE");
+      await typeText("Monitoring system.");
+      await typeText("Ready for commands.");
+      return "";
+    },
+
+    connect: async (args: string[]): Promise<string> => {
+      const node = args[0] || "node1";
+      setActiveNode(node.toUpperCase());
+      await typeText(`Connecting to ${node}...`);
+      await typeText("Connection established.");
+      return "";
+    },
+
+    theme: async (args: string[]): Promise<string> => {
+      const newTheme = args[0] as "cyan" | "green" | "amber" | "red";
+      if (!["cyan", "green", "amber", "red"].includes(newTheme)) {
+        return "Available themes: cyan, green, amber, red";
+      }
+      _setTheme(newTheme);
+      await typeText(`Theme changed to ${newTheme}`);
+      return "";
+    },
+
+    attack: async (): Promise<string> => {
+      if (!await requireRoot()) return "";
+      
+      await typeText("USER → NODE → FIREWALL → ACCESS");
+      await typeText("");
+      await typeText("Penetrating NODE...");
+      await typeText(progressBar(33));
+      await typeText("");
+      await typeText("Breaking FIREWALL...");
+      await typeText(progressBar(66));
+      await typeText("");
+      await typeText("Gaining ACCESS...");
+      await typeText(progressBar(100));
+      await typeText("");
+      await typeText("SYSTEM COMPROMISED");
+      return "";
+    },
+
+    crash: async (): Promise<string> => {
+      if (!await requireRoot()) return "";
+      
+      _setSystemCrashed(true);
+      await typeText("INITIATING SYSTEM SHUTDOWN...");
+      await typeText("Terminating all processes...");
+      await typeText("");
+      await typeText("KERNEL PANIC");
+      await typeText("SYSTEM FAILURE");
+      await typeText("REBOOT REQUIRED");
+      
+      setTimeout(() => {
+        _setSystemCrashed(false);
+        setBootSequenceShown(false);
+        setHistory([]);
+      }, 3000);
+      
+      return "";
+    },
   };
 
   const getAutocompleteOptions = (): string[] => {
@@ -361,6 +508,7 @@ Network Status: CONNECTED
           ...prev,
           { text: "guest@andsoft:~$ Password: ••••", type: "input" }
         ]);
+        setUser("root");
         setHistory(prev => [
           ...prev,
           { text: "Welcome to AndSoft, root.", type: "system" }
@@ -490,6 +638,30 @@ Network Status: CONNECTED
     });
   }, [history]);
 
+  // Load history from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("term_history");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setHistory(parsed);
+        }
+      }
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }, []);
+
+  // Save history to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("term_history", JSON.stringify(history));
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }, [history]);
+
   // Matrix rain animation
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -547,17 +719,21 @@ Network Status: CONNECTED
 
   // Boot sequence on first terminal open
   useEffect(() => {
-    if (showTerminal && !bootSequenceShown) {
+    if (showTerminal && !bootSequenceShown && showBootScreen) {
       setBootSequenceShown(true);
-      setHistory(prev => [
-        ...prev,
-        { text: "[ OK ] Initializing kernel...", type: "system" },
-        { text: "[ OK ] Loading modules...", type: "system" },
-        { text: "[ OK ] Connecting to network...", type: "system" },
-        { text: "[ OK ] AndSoft system ready.", type: "system" }
-      ]);
+      // Wait briefly then hide boot screen
+      setTimeout(() => {
+        setShowBootScreen(false);
+        setHistory(prev => [
+          ...prev,
+          { text: "[ OK ] Initializing kernel...", type: "system" },
+          { text: "[ OK ] Loading modules...", type: "system" },
+          { text: "[ OK ] Connecting to network...", type: "system" },
+          { text: "[ OK ] AndSoft system ready.", type: "system" }
+        ]);
+      }, 4000);
     }
-  }, [showTerminal, bootSequenceShown]);
+  }, [showTerminal, bootSequenceShown, showBootScreen]);
 
   const handleAccess = () => {
     setAccess(true);
@@ -722,6 +898,48 @@ Network Status: CONNECTED
 
           {/* ─── Terminal (collapsible) ─── */}
           <div className="mb-8">
+            {/* Boot Screen Overlay */}
+            {showBootScreen && showTerminal && (
+              <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] font-mono text-cyan-400 text-sm">
+                <div className="text-center space-y-4">
+                  <div className="text-lg font-bold mb-8">ANDSOFT BIOS v3.2</div>
+                  <div>Initializing hardware...</div>
+                  <div>Memory check... <span className="text-green-400">OK</span></div>
+                  <div>CPU check... <span className="text-green-400">OK</span></div>
+                  <div>Booting kernel...</div>
+                  <div className="mt-8 animate-pulse">Starting system...</div>
+                </div>
+              </div>
+            )}
+
+            {/* Nano Editor Overlay */}
+            {nanoMode && (
+              <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[100] font-mono">
+                <div className="w-[90%] h-[80%] bg-[#0a0e27] border border-cyan-500/30 rounded-lg flex flex-col">
+                  <div className="bg-cyan-500/20 px-4 py-2 border-b border-cyan-500/30 flex justify-between items-center">
+                    <span className="text-cyan-400 text-sm">GNU nano 7.2  File: {nanoFile}</span>
+                    <span className="text-gray-600 text-xs">^X Exit</span>
+                  </div>
+                  <textarea
+                    value={nanoContent}
+                    onChange={(e) => setNanoContent(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.ctrlKey && e.key === 'x') {
+                        e.preventDefault();
+                        setDynamicFiles(prev => ({ ...prev, [nanoFile]: nanoContent }));
+                        setNanoMode(false);
+                      }
+                    }}
+                    className="flex-1 bg-transparent text-cyan-300 outline-none p-4 resize-none"
+                    autoFocus
+                  />
+                  <div className="bg-cyan-500/10 px-4 py-2 border-t border-cyan-500/30 text-cyan-400 text-xs">
+                    ^G Get Help  ^X Exit  ^O WriteOut  ^R Read File  ^Y Prev Page  ^K Cut Text  ^U Uncut Text  ^J Justify
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <button
               onClick={() => {
                 setShowTerminal(!showTerminal);
@@ -840,8 +1058,8 @@ Network Status: CONNECTED
                 {/* Terminal input */}
                 <div className="mt-auto pt-3 border-t border-white/[0.04]">
                   <div className="flex items-start gap-2 relative">
-                    <span className="text-cyan-500/70 shrink-0 whitespace-nowrap text-xs">
-                      guest@andsoft:{currentDir}$
+                    <span className="text-cyan-500/70 shrink-0 whitespace-nowrap text-xs font-mono">
+                      {user}@{activeNode}:{currentDir}$
                     </span>
                     <div className="flex-1 relative">
                       <textarea
@@ -923,6 +1141,43 @@ Network Status: CONNECTED
           {/* Bottom accent line */}
           <div className="mt-4 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent"></div>
         </div>
+
+        {/* Floating Terminal Button */}
+        {showTerminal && !showFloatingTerminal && (
+          <button
+            onClick={() => {
+              setShowFloatingTerminal(true);
+              setShowTerminal(false);
+            }}
+            className="fixed bottom-8 right-8 p-3 rounded-full bg-cyan-500/20 border border-cyan-500/50 hover:bg-cyan-500/30 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] z-50"
+            title="Minimize Terminal"
+          >
+            <Terminal size={20} className="text-cyan-400" />
+          </button>
+        )}
+
+        {/* Floating Terminal Window */}
+        {showFloatingTerminal && (
+          <div className="fixed bottom-8 right-8 w-80 bg-[#0a0e27]/95 border border-cyan-500/20 rounded-lg shadow-xl backdrop-blur-md z-50">
+            <div className="flex justify-between items-center p-3 border-b border-cyan-500/10">
+              <span className="text-cyan-400 text-xs font-mono">Terminal</span>
+              <button
+                onClick={() => {
+                  setShowFloatingTerminal(false);
+                  setShowTerminal(true);
+                }}
+                className="text-cyan-500 hover:text-cyan-300 transition"
+              >
+                ⛶
+              </button>
+            </div>
+            <div className="h-40 bg-[#050816] overflow-y-auto text-cyan-300 text-xs font-mono p-3 space-y-1">
+              {history.slice(-5).map((line, i) => (
+                <div key={i} className="text-gray-500">{line.text.substring(0, 40)}{line.text.length > 40 ? '...' : ''}</div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </footer>
   );
