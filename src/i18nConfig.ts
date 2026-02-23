@@ -93,9 +93,14 @@ export const translations = {
   'palette.placeholder': { EN: 'Type a command…', MN: 'Команд бичнэ үү…' },
   'palette.navigate': { EN: 'Navigate', MN: 'Шилжих' },
   'palette.actions': { EN: 'Actions', MN: 'Үйлдлүүд' },
+  'palette.apps': { EN: 'Open App', MN: 'Апп нээх' },
   'palette.toggleTheme': { EN: 'Toggle Theme', MN: 'Тема солих' },
   'palette.toggleLang': { EN: 'Toggle Language', MN: 'Хэл солих' },
   'palette.hint': { EN: 'Ctrl+K to open command palette', MN: 'Ctrl+K командын самбар нээх' },
+  'palette.openTerminal': { EN: 'Open Terminal', MN: 'Терминал нээх' },
+  'palette.openMonitor': { EN: 'Open System Monitor', MN: 'Систем хяналт нээх' },
+  'palette.openFiles': { EN: 'Open File Manager', MN: 'Файл менежер нээх' },
+  'palette.openMail': { EN: 'Open Mail', MN: 'Имэйл нээх' },
 
   // Footer
   'footer.title': { EN: '/sys/footer — System Info', MN: '/sys/хөл — Системийн мэдээлэл' },

@@ -2,11 +2,12 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import {
   Globe, Wifi, Battery, Volume2, Menu, X, Sun, Moon,
   Search, ArrowRight, Languages,
-  Home, Code, FolderOpen, Mail,
+  Home, Code, FolderOpen, Mail, MonitorDot, AppWindow,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n } from '../useI18n';
 import { useTheme } from '../useTheme';
+import { useWindowManager } from '../windowManager';
 
 function getDateTime() {
   const now = new Date();
@@ -27,6 +28,7 @@ function getDateTime() {
 export default function Header() {
   const { lang, toggleLang, t } = useI18n();
   const { isDark, toggleTheme } = useTheme();
+  const { openWindow } = useWindowManager();
 
   const [{ time, date }, setDateTime] = useState(getDateTime);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -139,6 +141,34 @@ export default function Header() {
         },
       })),
       {
+        id: 'open-terminal',
+        label: t('palette.openTerminal'),
+        icon: MonitorDot,
+        group: t('palette.apps'),
+        action: () => { openWindow('home'); setPaletteOpen(false); },
+      },
+      {
+        id: 'open-monitor',
+        label: t('palette.openMonitor'),
+        icon: AppWindow,
+        group: t('palette.apps'),
+        action: () => { openWindow('technologies'); setPaletteOpen(false); },
+      },
+      {
+        id: 'open-files',
+        label: t('palette.openFiles'),
+        icon: FolderOpen,
+        group: t('palette.apps'),
+        action: () => { openWindow('projects'); setPaletteOpen(false); },
+      },
+      {
+        id: 'open-mail',
+        label: t('palette.openMail'),
+        icon: Mail,
+        group: t('palette.apps'),
+        action: () => { openWindow('contact'); setPaletteOpen(false); },
+      },
+      {
         id: 'theme',
         label: t('palette.toggleTheme'),
         icon: isDark ? Sun : Moon,
@@ -153,7 +183,7 @@ export default function Header() {
         action: () => { toggleLang(); setPaletteOpen(false); },
       },
     ],
-    [navItems, isDark, t, toggleTheme, toggleLang],
+    [navItems, isDark, t, toggleTheme, toggleLang, openWindow],
   );
 
   const filteredActions = useMemo(() => {
