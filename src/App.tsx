@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import TechStack from './components/TechStack';
@@ -11,6 +12,10 @@ import { ThemeProvider } from './theme';
 import { WindowManagerProvider } from './windowManager';
 
 function App() {
+  /* Ensure we always start at the top after hydration */
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <ThemeProvider>
       <I18nProvider>

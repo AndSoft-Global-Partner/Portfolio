@@ -1,6 +1,6 @@
 import { Phone, Mail, MapPin, Send, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useI18n } from '../useI18n';
 import { useTheme } from '../useTheme';
 
@@ -8,6 +8,20 @@ export default function AboutContact() {
   const { t } = useI18n();
   const { isDark } = useTheme();
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [mapVisible, setMapVisible] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  /* Only load the iframe when the map container scrolls into view */
+  useEffect(() => {
+    const el = mapRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setMapVisible(true); obs.disconnect(); } },
+      { rootMargin: '200px' }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const contactInfo = [
     { icon: Phone, label: t('contact.phone'), value: "+976 99119000", href: "tel:+97699119000", type: "phone" as const },
@@ -92,7 +106,7 @@ export default function AboutContact() {
                 {t('contact.map')}
               </div>
             </div>
-            <div className="relative h-[180px] group bg-os-bg rounded-b-[10px] overflow-hidden">
+            <div ref={mapRef} className="relative h-[180px] group bg-os-bg rounded-b-[10px] overflow-hidden">
               <a
                 href="https://maps.app.goo.gl/AnQqmdH7yEd2PeqDA"
                 target="_blank"
@@ -101,22 +115,29 @@ export default function AboutContact() {
               >
                 <span className="sr-only">Open in Google Maps</span>
               </a>
-              <iframe
-                src="https://www.google.com/maps?q=Embassy+One+бизнес+оффис+Job+Job,+Ulaanbaatar&z=17&output=embed"
-                width="100%"
-                height="100%"
-                style={{
-                  border: 0,
-                  filter: isDark
-                    ? 'grayscale(100%) invert(85%) contrast(90%) hue-rotate(180deg)'
-                    : 'grayscale(20%) saturate(0.8)',
-                }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                sandbox="allow-scripts allow-same-origin allow-popups"
-                className="opacity-40 group-hover:opacity-70 transition-opacity duration-500"
-              />
+              {mapVisible ? (
+                <iframe
+                  src="https://www.google.com/maps?q=Embassy+One+бизнес+оффис+Job+Job,+Ulaanbaatar&z=17&output=embed"
+                  width="100%"
+                  height="100%"
+                  tabIndex={-1}
+                  style={{
+                    border: 0,
+                    filter: isDark
+                      ? 'grayscale(100%) invert(85%) contrast(90%) hue-rotate(180deg)'
+                      : 'grayscale(20%) saturate(0.8)',
+                  }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  sandbox="allow-scripts allow-same-origin allow-popups"
+                  className="opacity-40 group-hover:opacity-70 transition-opacity duration-500 pointer-events-none"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <MapPin size={24} className="text-os-dim animate-pulse" />
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
