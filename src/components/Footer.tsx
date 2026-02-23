@@ -38,8 +38,6 @@ export default function Footer() {
   const [showTerminal, setShowTerminal] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const historyRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
   const termHeight =
     termSize === "small"
       ? "h-[150px]"
@@ -48,62 +46,6 @@ export default function Footer() {
       : termSize === "full"
       ? "h-[480px]"
       : "h-[220px]";
-
-  const themeColor = {
-    cyan: "text-cyan-400",
-    green: "text-green-400",
-    amber: "text-amber-400",
-    red: "text-red-400"
-  }[_theme];
-
-  const themeBright = {
-    cyan: "text-cyan-300/90",
-    green: "text-green-300/90",
-    amber: "text-amber-300/90",
-    red: "text-red-300/90"
-  }[_theme];
-
-  const themeDim = {
-    cyan: "text-cyan-500/40",
-    green: "text-green-500/40",
-    amber: "text-amber-500/40",
-    red: "text-red-500/40"
-  }[_theme];
-
-  const themeBorder = {
-    cyan: "border-cyan-500/10",
-    green: "border-green-500/10",
-    amber: "border-amber-500/10",
-    red: "border-red-500/10"
-  }[_theme];
-
-  const themeBg = {
-    cyan: "bg-cyan-400/[0.06]",
-    green: "bg-green-400/[0.06]",
-    amber: "bg-amber-400/[0.06]",
-    red: "bg-red-400/[0.06]"
-  }[_theme];
-
-  const themeHover = {
-    cyan: "hover:text-cyan-400",
-    green: "hover:text-green-400",
-    amber: "hover:text-amber-400",
-    red: "hover:text-red-400"
-  }[_theme];
-
-  const themeBorderHover = {
-    cyan: "group-hover:border-cyan-500/30",
-    green: "group-hover:border-green-500/30",
-    amber: "group-hover:border-amber-500/30",
-    red: "group-hover:border-red-500/30"
-  }[_theme];
-
-  const themeGlow = {
-    cyan: "shadow-[0_0_25px_rgba(0,255,255,0.15)]",
-    green: "shadow-[0_0_25px_rgba(0,255,0,0.15)]",
-    amber: "shadow-[0_0_25px_rgba(255,191,0,0.15)]",
-    red: "shadow-[0_0_25px_rgba(255,0,0,0.15)]"
-  }[_theme];
 
   const fileSystem = {
     "/": ["home"],
@@ -869,61 +811,6 @@ Network Status: CONNECTED
     }
   }, []);
 
-  // Matrix rain animation
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-
-    const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
-    const charCount = 50;
-    const drops: number[] = [];
-
-    for (let i = 0; i < charCount; i++) {
-      drops[i] = Math.random() * canvas.height;
-    }
-
-    const draw = () => {
-      ctx.fillStyle = "rgba(5, 8, 22, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#00d4ff";
-      ctx.font = "10px monospace";
-
-      for (let i = 0; i < charCount; i++) {
-        const char = chars[Math.floor(Math.random() * chars.length)];
-        const x = (i * (canvas.width / charCount)) + Math.random() * 20;
-        
-        ctx.fillText(char, x, drops[i]);
-
-        if (drops[i] > canvas.height) {
-          drops[i] = 0;
-        }
-
-        drops[i] += Math.random() * 3 + 1;
-      }
-
-      setTimeout(draw, 33);
-    };
-
-    const handleResize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-
-    window.addEventListener('resize', handleResize);
-    draw();
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   // Boot sequence on first terminal open
   useEffect(() => {
     if (showTerminal && !bootSequenceShown && showBootScreen) {
@@ -949,11 +836,6 @@ Network Status: CONNECTED
     setAccess(true);
     playAccessSound();
     setTimeout(() => setAccess(false), 2000);
-  };
-
-  const handleDragStart = () => {
-    // Terminal is visually draggable (cursor feedback on titlebar)
-    // Full drag implementation can be extended using react-rnd if needed
   };
 
   // Sound effects using Web Audio API
@@ -990,418 +872,395 @@ Network Status: CONNECTED
   };
 
   const statusItems = [
-    { label: "NETWORK", value: "ONLINE", color: "text-green-400", icon: <Activity size={14} /> },
-    { label: "CPU", value: `${cpu}%`, color: "text-yellow-400", icon: <Zap size={14} /> },
-    { label: "RAM", value: `${ram}%`, color: "text-purple-400", icon: <Server size={14} /> },
-    { label: "UPTIME", value: `${uptime}s`, color: "text-green-400", icon: <Shield size={14} /> },
+    { label: "NETWORK", value: "ONLINE", icon: <Activity size={14} /> },
+    { label: "CPU", value: `${cpu}%`, icon: <Zap size={14} /> },
+    { label: "RAM", value: `${ram}%`, icon: <Server size={14} /> },
+    { label: "UPTIME", value: `${uptime}s`, icon: <Shield size={14} /> },
   ];
 
   return (
-    <footer className="relative overflow-hidden">
-      {/* Top gradient border */}
-      <div className="h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
-
-      <div className="relative bg-[#050816]/80 backdrop-blur-xl pt-10 pb-6">
-        {/* Matrix rain effect */}
-        <canvas 
-          ref={canvasRef}
-          className="absolute inset-0 opacity-5 pointer-events-none"
-          style={{ display: 'block' }}
-        />
-        
-        {/* Ambient glow */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute w-[600px] h-[600px] bg-cyan-500/[0.04] blur-[150px] rounded-full -top-60 left-1/4"></div>
-          <div className="absolute w-[400px] h-[400px] bg-blue-500/[0.03] blur-[120px] rounded-full -bottom-40 right-1/4"></div>
+    <footer className="px-3 md:px-6 py-3">
+      {/* Boot Screen Overlay */}
+      {showBootScreen && showTerminal && (
+        <div className="fixed inset-0 bg-os-bg/95 flex items-center justify-center z-[100] font-mono text-os-green text-sm">
+          <div className="text-center space-y-4">
+            <div className="text-lg font-bold mb-8 glow-green">ANDSOFT BIOS v3.2</div>
+            <div className="text-os-muted">Initializing hardware...</div>
+            <div className="text-os-muted">Memory check... <span className="text-os-green">OK</span></div>
+            <div className="text-os-muted">CPU check... <span className="text-os-green">OK</span></div>
+            <div className="text-os-muted">Booting kernel...</div>
+            <div className="mt-8 animate-pulse text-os-cyan">Starting system...</div>
+          </div>
         </div>
+      )}
 
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
-
-          {/* ─── Top: Brand + Contact + System ─── */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-10">
-
-            {/* Brand */}
-            <div className="md:col-span-5">
-              <div className="mb-4">
-                <div className="text-3xl font-bold tracking-tight relative inline-block group cursor-pointer">
-                  <span className="text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300">And</span>
-                  <span className="text-white/90 group-hover:text-white transition">Soft</span>
-                  <div className="absolute -inset-2 bg-cyan-400/0 group-hover:bg-cyan-400/5 blur-xl rounded-full transition-all duration-500 pointer-events-none"></div>
-                </div>
+      {/* Nano Editor Overlay */}
+      {nanoMode && (
+        <div className="fixed inset-0 bg-os-bg/95 flex items-center justify-center z-[100] font-mono">
+          <div className="w-[90%] h-[80%] os-window flex flex-col">
+            <div className="os-titlebar flex justify-between items-center">
+              <div className="os-dots">
+                <div className="os-dot close" />
+                <div className="os-dot minimize" />
+                <div className="os-dot maximize" />
               </div>
-              <p className="text-gray-400/70 text-sm leading-relaxed max-w-sm mb-6">
-                Building the future of digital infrastructure. Secure, scalable, and intelligent solutions for the modern world.
-              </p>
-              {/* Social icons */}
-              <div className="flex items-center gap-3">
-                {[
-                  { icon: <Github size={16} />, href: "#" },
-                  { icon: <Linkedin size={16} />, href: "#" },
-                  { icon: <Twitter size={16} />, href: "#" },
-                  { icon: <Facebook size={16} />, href: "#" },
-                ].map((social, i) => (
-                  <a
-                    key={i}
-                    href={social.href}
-                    className="w-9 h-9 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-gray-500 hover:text-cyan-400 hover:bg-cyan-400/[0.08] hover:border-cyan-500/30 hover:shadow-[0_0_20px_rgba(6,182,212,0.1)] transition-all duration-300"
-                  >
-                    {social.icon}
-                  </a>
-                ))}
-              </div>
+              <div className="os-title">GNU nano 7.2 — {nanoFile}</div>
+              <span className="text-os-dim text-[10px] font-mono">^X Exit</span>
             </div>
-
-            {/* Contact */}
-            <div className="md:col-span-3">
-              <h4 className="text-white/90 font-semibold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-cyan-400"></div>
-                Contact
-              </h4>
-              <ul className="space-y-3.5">
-                <li className="flex items-center gap-3 text-gray-400/70 text-sm group cursor-default hover:text-gray-300 transition-colors">
-                  <div className="p-1.5 rounded-lg bg-cyan-400/[0.06] border border-cyan-500/10 group-hover:border-cyan-500/25 transition">
-                    <Phone size={12} className="text-cyan-400/60" />
-                  </div>
-                  +976 99212999
-                </li>
-                <li className="flex items-center gap-3 text-gray-400/70 text-sm group cursor-default hover:text-gray-300 transition-colors">
-                  <div className="p-1.5 rounded-lg bg-cyan-400/[0.06] border border-cyan-500/10 group-hover:border-cyan-500/25 transition">
-                    <Mail size={12} className="text-cyan-400/60" />
-                  </div>
-                  info@andsoft.mn
-                </li>
-                <li className="flex items-center gap-3 text-gray-400/70 text-sm group cursor-default hover:text-gray-300 transition-colors">
-                  <div className="p-1.5 rounded-lg bg-cyan-400/[0.06] border border-cyan-500/10 group-hover:border-cyan-500/25 transition">
-                    <MapPin size={12} className="text-cyan-400/60" />
-                  </div>
-                  Ulaanbaatar, Mongolia
-                </li>
-              </ul>
+            <textarea
+              value={nanoContent}
+              onChange={(e) => setNanoContent(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.ctrlKey && e.key === 'x') {
+                  e.preventDefault();
+                  const fullPath = `${currentDir}/${nanoFile}`.replace("//", "/");
+                  setDynamicFiles(prev => ({
+                    ...prev,
+                    [fullPath]: {
+                      type: "file",
+                      content: nanoContent,
+                      path: fullPath
+                    }
+                  }));
+                  setNanoMode(false);
+                  setTimeout(() => {
+                    typeText(`Saved ${nanoFile}`, "system");
+                  }, 100);
+                }
+              }}
+              className="flex-1 bg-os-bg/50 text-os-green outline-none p-4 resize-none font-mono text-sm"
+              autoFocus
+            />
+            <div className="px-4 py-2 border-t border-os-border bg-os-titlebar/50 text-os-dim text-[10px] font-mono">
+              ^G Get Help  ^X Exit  ^O WriteOut  ^R Read File  ^Y Prev Page  ^K Cut Text  ^U Uncut Text  ^J Justify
             </div>
+          </div>
+        </div>
+      )}
 
-            {/* System Status */}
-            <div className="md:col-span-4" onClick={handleAccess}>
-              <h4 className="text-white/90 font-semibold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-green-400"></div>
-                System Status
-              </h4>
-              <div className="grid grid-cols-2 gap-2.5">
-                {statusItems.map((item, i) => (
-                  <div
-                    key={i}
-                    className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 hover:bg-cyan-400/[0.04] hover:border-cyan-500/15 transition-all duration-300 cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className={`${item.color} opacity-50 group-hover:opacity-100 transition`}>{item.icon}</span>
-                      <span className="text-gray-600 text-[10px] uppercase tracking-wider font-medium">{item.label}</span>
-                    </div>
-                    <div className={`${item.color} text-xs font-mono font-medium`}>{item.value}</div>
-                  </div>
-                ))}
-              </div>
-              {access && (
-                <div className="text-cyan-400 text-xs font-mono mt-3 animate-pulse text-center tracking-wider">
-                  ● ACCESS GRANTED
-                </div>
-              )}
+      <div className="max-w-5xl mx-auto space-y-3">
+        {/* ─── Top: Brand + Contact + System ─── */}
+        <div className="os-window">
+          <div className="os-titlebar">
+            <div className="os-dots">
+              <div className="os-dot close" />
+              <div className="os-dot minimize" />
+              <div className="os-dot maximize" />
+            </div>
+            <div className="os-title">
+              /sys/footer — System Info
             </div>
           </div>
 
-          {/* ─── Terminal (collapsible) ─── */}
-          <div className="mb-8">
-            {/* Boot Screen Overlay */}
-            {showBootScreen && showTerminal && (
-              <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[100] font-mono text-cyan-400 text-sm">
-                <div className="text-center space-y-4">
-                  <div className="text-lg font-bold mb-8">ANDSOFT BIOS v3.2</div>
-                  <div>Initializing hardware...</div>
-                  <div>Memory check... <span className="text-green-400">OK</span></div>
-                  <div>CPU check... <span className="text-green-400">OK</span></div>
-                  <div>Booting kernel...</div>
-                  <div className="mt-8 animate-pulse">Starting system...</div>
-                </div>
-              </div>
-            )}
+          <div className="p-4 md:p-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
 
-            {/* Nano Editor Overlay */}
-            {nanoMode && (
-              <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[100] font-mono">
-                <div className="w-[90%] h-[80%] bg-[#0a0e27] border border-cyan-500/30 rounded-lg flex flex-col">
-                  <div className="bg-cyan-500/20 px-4 py-2 border-b border-cyan-500/30 flex justify-between items-center">
-                    <span className="text-cyan-400 text-sm">GNU nano 7.2  File: {nanoFile}</span>
-                    <span className="text-gray-600 text-xs">^X Exit</span>
-                  </div>
-                  <textarea
-                    value={nanoContent}
-                    onChange={(e) => setNanoContent(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.ctrlKey && e.key === 'x') {
-                        e.preventDefault();
-                        const fullPath = `${currentDir}/${nanoFile}`.replace("//", "/");
-                        setDynamicFiles(prev => ({
-                          ...prev,
-                          [fullPath]: {
-                            type: "file",
-                            content: nanoContent,
-                            path: fullPath
-                          }
-                        }));
-                        setNanoMode(false);
-                        setTimeout(() => {
-                          typeText(`Saved ${nanoFile}`, "system");
-                        }, 100);
-                      }
-                    }}
-                    className="flex-1 bg-transparent text-cyan-300 outline-none p-4 resize-none"
-                    autoFocus
-                  />
-                  <div className="bg-cyan-500/10 px-4 py-2 border-t border-cyan-500/30 text-cyan-400 text-xs">
-                    ^G Get Help  ^X Exit  ^O WriteOut  ^R Read File  ^Y Prev Page  ^K Cut Text  ^U Uncut Text  ^J Justify
-                  </div>
+              {/* Brand */}
+              <div className="md:col-span-5">
+                <div className="mb-3">
+                  <span className="text-2xl font-bold font-mono tracking-tight glow-green">ANDSOFT</span>
+                  <span className="text-os-dim text-[10px] font-mono tracking-wider ml-2">v2.5 LTS</span>
+                </div>
+                <p className="text-os-muted text-xs leading-relaxed max-w-sm mb-4">
+                  Building the future of digital infrastructure. Secure, scalable, and intelligent solutions for the modern world.
+                </p>
+                {/* Social icons */}
+                <div className="flex items-center gap-2">
+                  {[
+                    { icon: <Github size={14} />, href: "#" },
+                    { icon: <Linkedin size={14} />, href: "#" },
+                    { icon: <Twitter size={14} />, href: "#" },
+                    { icon: <Facebook size={14} />, href: "#" },
+                  ].map((social, i) => (
+                    <a
+                      key={i}
+                      href={social.href}
+                      className="w-8 h-8 rounded-md bg-os-border/30 border border-os-border flex items-center justify-center text-os-dim hover:text-os-green hover:bg-os-green/10 hover:border-os-green/30 transition-all duration-300"
+                    >
+                      {social.icon}
+                    </a>
+                  ))}
                 </div>
               </div>
-            )}
-            
+
+              {/* Contact */}
+              <div className="md:col-span-3">
+                <div className="font-mono text-[10px] text-os-dim tracking-wider uppercase mb-3 flex items-center gap-2">
+                  <span className="text-os-green">●</span> CONTACT
+                </div>
+                <ul className="space-y-2.5">
+                  <li className="flex items-center gap-2.5 text-os-muted text-xs group cursor-default hover:text-os-text transition-colors">
+                    <div className="w-7 h-7 rounded flex items-center justify-center bg-os-border/30 group-hover:bg-os-green/10 transition-colors">
+                      <Phone size={12} className="text-os-dim group-hover:text-os-green transition-colors" />
+                    </div>
+                    +976 99212999
+                  </li>
+                  <li className="flex items-center gap-2.5 text-os-muted text-xs group cursor-default hover:text-os-text transition-colors">
+                    <div className="w-7 h-7 rounded flex items-center justify-center bg-os-border/30 group-hover:bg-os-green/10 transition-colors">
+                      <Mail size={12} className="text-os-dim group-hover:text-os-green transition-colors" />
+                    </div>
+                    info@andsoft.mn
+                  </li>
+                  <li className="flex items-center gap-2.5 text-os-muted text-xs group cursor-default hover:text-os-text transition-colors">
+                    <div className="w-7 h-7 rounded flex items-center justify-center bg-os-border/30 group-hover:bg-os-green/10 transition-colors">
+                      <MapPin size={12} className="text-os-dim group-hover:text-os-green transition-colors" />
+                    </div>
+                    Ulaanbaatar, Mongolia
+                  </li>
+                </ul>
+              </div>
+
+              {/* System Status */}
+              <div className="md:col-span-4" onClick={handleAccess}>
+                <div className="font-mono text-[10px] text-os-dim tracking-wider uppercase mb-3 flex items-center gap-2">
+                  <span className="text-os-green">●</span> SYSTEM STATUS
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {statusItems.map((item, i) => (
+                    <div
+                      key={i}
+                      className="bg-os-bg/50 border border-os-border/50 rounded-md p-2.5 hover:bg-os-green/[0.03] hover:border-os-green/20 transition-all duration-300 cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-os-dim group-hover:text-os-green transition">{item.icon}</span>
+                        <span className="text-os-dim text-[9px] uppercase tracking-wider font-mono">{item.label}</span>
+                      </div>
+                      <div className="text-os-green text-[11px] font-mono font-medium">{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+                {access && (
+                  <div className="text-os-green text-[10px] font-mono mt-2 animate-pulse text-center tracking-wider">
+                    ● ACCESS GRANTED
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ─── Terminal (collapsible) ─── */}
+        <div className="os-window">
+          <div className="os-titlebar">
+            <div className="os-dots">
+              <div className="os-dot close" />
+              <div className="os-dot minimize" />
+              <div className="os-dot maximize" />
+            </div>
+            <div className="os-title">
+              {user}@{activeNode.toLowerCase()} — bash — terminal
+            </div>
             <button
               onClick={() => {
                 setShowTerminal(!showTerminal);
                 playSound(600, 0.1, 'sine');
               }}
-              className={`flex items-center gap-2.5 text-sm text-gray-500 ${themeHover} transition-colors duration-200 mb-4 group`}
+              className="font-mono text-[10px] text-os-dim hover:text-os-green transition-colors"
             >
-              <div className={`p-1.5 rounded-lg ${themeBg} border ${themeBorder} ${themeBorderHover} transition`}>
-                <Terminal size={13} className={`${themeColor}/50 group-hover:${themeColor} transition`} />
-              </div>
-              <span className="font-mono text-xs uppercase tracking-widest">
-                {showTerminal ? "Close Terminal" : "Open Terminal"}
-              </span>
-              <span className={`text-[10px] ${themeDim} transition-transform duration-300 ${showTerminal ? "rotate-180" : ""}`}>▼</span>
+              {showTerminal ? "▼ Hide" : "▶ Show"}
             </button>
+          </div>
 
-            <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showTerminal ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
-              <div className={`
-                w-full
-                max-w-2xl
-                bg-[#0a0e27]/90
-                border ${themeBorder}
-                rounded-2xl
-                p-5
-                font-mono
-                text-xs md:text-sm
-                ${termHeight}
-                transition-all duration-300
-                flex flex-col
-                backdrop-blur-md
-                ${themeGlow}
-              `}>
-                {/* Terminal titlebar */}
-                <div 
-                  className="flex justify-between items-center mb-3 pb-3 border-b border-white/[0.04] cursor-grab active:cursor-grabbing select-none"
-                  onMouseDown={handleDragStart}
+          <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showTerminal ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
+            <div className={`
+              p-4 md:p-5
+              font-mono
+              text-xs md:text-sm
+              ${termHeight}
+              transition-all duration-300
+              flex flex-col
+              bg-os-bg/50
+            `}>
+              {/* Terminal size controls */}
+              <div className="flex justify-end gap-1 mb-2">
+                <button
+                  onClick={() => setTermSize("small")}
+                  className="text-[10px] w-6 h-5 rounded bg-os-border/30 hover:bg-os-green/10 text-os-dim hover:text-os-green transition flex items-center justify-center"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/70 hover:bg-red-500 transition cursor-pointer"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70 hover:bg-yellow-500 transition cursor-pointer"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/70 hover:bg-green-500 transition cursor-pointer"></div>
-                    </div>
-                    <div className="flex items-center gap-1.5 ml-1">
-                      <div className={`w-1 h-1 rounded-full ${themeColor}/40 animate-pulse`}></div>
-                      <span className="text-gray-600 text-[10px] uppercase tracking-widest">andsoft — bash</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => setTermSize("small")}
-                      className={`text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-white/10 text-gray-600 hover:${themeColor} transition flex items-center justify-center`}
-                    >
-                      −
-                    </button>
-                    <button
-                      onClick={() => setTermSize(termSize === "full" ? "normal" : "full")}
-                      className={`text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-white/10 text-gray-600 hover:${themeColor} transition flex items-center justify-center`}
-                    >
-                      □
-                    </button>
-                    <button
-                      onClick={() => setTermSize("large")}
-                      className={`text-[10px] w-6 h-5 rounded-md bg-white/[0.03] hover:bg-white/10 text-gray-600 hover:${themeColor} transition flex items-center justify-center`}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* Terminal output */}
-                <div
-                  ref={historyRef}
-                  className="flex-1 overflow-y-auto overflow-x-hidden space-y-0.5 break-words whitespace-pre-wrap pr-1"
-                  style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(6,182,212,0.15) transparent' }}
+                  −
+                </button>
+                <button
+                  onClick={() => setTermSize(termSize === "full" ? "normal" : "full")}
+                  className="text-[10px] w-6 h-5 rounded bg-os-border/30 hover:bg-os-green/10 text-os-dim hover:text-os-green transition flex items-center justify-center"
                 >
-                  {history.map((line, i) => {
-                    if (line.text === "__SHOW_FSOCIETY__") {
-                      return (
-                        <img key={i} src="/fsociety.jpg" alt="fsociety" className="w-40 mt-2 rounded-lg border border-cyan-500/10" />
-                      );
-                    }
-                    if (line.text === "__SHOW_LOSER__") {
-                      return (
-                        <img key={i} src="/loser.jpg" alt="loser" className="w-40 mt-2 rounded-lg border border-red-500/10" />
-                      );
-                    }
+                  □
+                </button>
+                <button
+                  onClick={() => setTermSize("large")}
+                  className="text-[10px] w-6 h-5 rounded bg-os-border/30 hover:bg-os-green/10 text-os-dim hover:text-os-green transition flex items-center justify-center"
+                >
+                  +
+                </button>
+              </div>
 
-                    let baseColor = themeBright;
-                    if (line.type === "input") baseColor = "text-gray-400";
-                    if (line.type === "error") baseColor = "text-red-400/80";
-                    if (line.type === "system") baseColor = "text-gray-600";
-
-                    const renderColoredText = (text: string) => {
-                      const parts = text.split(/(\[BLUE\].*?\[\/BLUE\]|\[GRAY\].*?\[\/GRAY\])/);
-                      return parts.map((part: string, idx: number) => {
-                        if (part.startsWith("[BLUE]")) {
-                          const content = part.replace(/\[BLUE\]|\[\/BLUE\]/g, "");
-                          return <span key={idx} className={themeColor}>{content}</span>;
-                        } else if (part.startsWith("[GRAY]")) {
-                          const content = part.replace(/\[GRAY\]|\[\/GRAY\]/g, "");
-                          return <span key={idx} className="text-gray-500">{content}</span>;
-                        }
-                        return part;
-                      });
-                    };
-
+              {/* Terminal output */}
+              <div
+                ref={historyRef}
+                className="flex-1 overflow-y-auto overflow-x-hidden space-y-0.5 break-words whitespace-pre-wrap pr-1"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,255,136,0.15) transparent' }}
+              >
+                {history.map((line, i) => {
+                  if (line.text === "__SHOW_FSOCIETY__") {
                     return (
-                      <div key={i} className={`${baseColor} break-words whitespace-pre-wrap leading-relaxed`}>
-                        {renderColoredText(line.text)}
-                      </div>
+                      <img key={i} src="/fsociety.jpg" alt="fsociety" className="w-40 mt-2 rounded-lg border border-os-green/10" />
                     );
-                  })}
-                </div>
+                  }
+                  if (line.text === "__SHOW_LOSER__") {
+                    return (
+                      <img key={i} src="/loser.jpg" alt="loser" className="w-40 mt-2 rounded-lg border border-os-red/10" />
+                    );
+                  }
 
-                {/* Terminal input */}
-                <div className="mt-auto pt-3 border-t border-white/[0.04]">
-                  <div className="flex items-start gap-2 relative">
-                    <span className={`${themeColor}/70 shrink-0 whitespace-nowrap text-xs font-mono`}>
-                      {user}@{activeNode}:{currentDir}$
-                    </span>
-                    <div className="flex-1 relative">
-                      <textarea
-                        ref={textareaRef}
-                        value={input}
-                        onChange={(e) => {
-                          setInput(e.target.value);
-                          setShowAutocomplete(e.target.value.length > 0);
-                        }}
-                        onKeyDown={handleKeyDown}
-                        disabled={isTyping || _systemCrashed}
-                        rows={1}
-                        className={`bg-transparent outline-none flex-1 w-full ${themeColor} caret-current min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-gray-700`}
-                        placeholder={isTyping ? "" : "type a command..."}
-                        autoFocus
-                      />
-                      {!isTyping && !_systemCrashed && <span className={`animate-pulse ${themeColor} ml-1`}>█</span>}
-                      
-                      {/* Autocomplete dropdown */}
-                      {showAutocomplete && getAutocompleteOptions().length > 0 && (
-                        <div className={`absolute bottom-full left-0 w-48 mb-1 bg-[#0a0e27]/95 border ${themeBorder} rounded-lg overflow-hidden shadow-lg backdrop-blur-md z-50`}>
-                          {getAutocompleteOptions().slice(0, 7).map((option, idx) => (
-                            <div
-                              key={idx}
-                              onClick={() => {
-                                const parts = input.trim().split(" ");
-                                parts[parts.length - 1] = option;
-                                setInput(parts.join(" ") + " ");
-                                setShowAutocomplete(false);
-                              }}
-                              className={`px-3 py-1.5 ${themeColor} text-xs hover:bg-white/5 cursor-pointer transition border-b ${themeBorder} last:border-b-0`}
-                            >
-                              {option}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                  let baseColor = "text-os-green/80";
+                  if (line.type === "input") baseColor = "text-os-muted";
+                  if (line.type === "error") baseColor = "text-os-red/80";
+                  if (line.type === "system") baseColor = "text-os-dim";
+
+                  const renderColoredText = (text: string) => {
+                    const parts = text.split(/(\[BLUE\].*?\[\/BLUE\]|\[GRAY\].*?\[\/GRAY\])/);
+                    return parts.map((part: string, idx: number) => {
+                      if (part.startsWith("[BLUE]")) {
+                        const content = part.replace(/\[BLUE\]|\[\/BLUE\]/g, "");
+                        return <span key={idx} className="text-os-cyan">{content}</span>;
+                      } else if (part.startsWith("[GRAY]")) {
+                        const content = part.replace(/\[GRAY\]|\[\/GRAY\]/g, "");
+                        return <span key={idx} className="text-os-dim">{content}</span>;
+                      }
+                      return part;
+                    });
+                  };
+
+                  return (
+                    <div key={i} className={`${baseColor} break-words whitespace-pre-wrap leading-relaxed`}>
+                      {renderColoredText(line.text)}
                     </div>
+                  );
+                })}
+              </div>
+
+              {/* Terminal input */}
+              <div className="mt-auto pt-3 border-t border-os-border/30">
+                <div className="flex items-start gap-2 relative">
+                  <span className="text-os-green/70 shrink-0 whitespace-nowrap text-xs font-mono">
+                    {user}@{activeNode}:{currentDir}$
+                  </span>
+                  <div className="flex-1 relative">
+                    <textarea
+                      ref={textareaRef}
+                      value={input}
+                      onChange={(e) => {
+                        setInput(e.target.value);
+                        setShowAutocomplete(e.target.value.length > 0);
+                      }}
+                      onKeyDown={handleKeyDown}
+                      disabled={isTyping || _systemCrashed}
+                      rows={1}
+                      className="bg-transparent outline-none flex-1 w-full text-os-green caret-current min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-os-dim/40"
+                      placeholder={isTyping ? "" : "type a command..."}
+                      autoFocus
+                    />
+                    {!isTyping && !_systemCrashed && <span className="animate-pulse text-os-green ml-1">█</span>}
+                    
+                    {/* Autocomplete dropdown */}
+                    {showAutocomplete && getAutocompleteOptions().length > 0 && (
+                      <div className="absolute bottom-full left-0 w-48 mb-1 bg-os-window border border-os-border rounded-md overflow-hidden shadow-lg z-50">
+                        {getAutocompleteOptions().slice(0, 7).map((option, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => {
+                              const parts = input.trim().split(" ");
+                              parts[parts.length - 1] = option;
+                              setInput(parts.join(" ") + " ");
+                              setShowAutocomplete(false);
+                            }}
+                            className="px-3 py-1.5 text-os-cyan text-xs hover:bg-os-green/10 cursor-pointer transition border-b border-os-border/30 last:border-b-0"
+                          >
+                            {option}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* ─── Bottom Bar ─── */}
-          <div className="border-t border-white/[0.04] pt-5 flex flex-col gap-4 md:flex-row md:justify-between md:items-center">
+        {/* ─── Bottom Bar ─── */}
+        <div className="os-window">
+          <div className="px-4 md:px-6 py-3 flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
             <div className="flex items-center gap-3">
-              <span className="text-gray-600 text-xs">
+              <span className="text-os-dim text-[11px] font-mono">
                 © {new Date().getFullYear()} AndSoft
               </span>
-              <span className="text-gray-800 text-xs">·</span>
-              <a href="#" className={`text-gray-600 hover:${themeColor} text-xs transition-colors duration-200`}>
+              <span className="text-os-dim/30 text-[11px]">·</span>
+              <a href="#" className="text-os-dim hover:text-os-green text-[11px] font-mono transition-colors">
                 Privacy
               </a>
-              <span className="text-gray-800 text-xs">·</span>
-              <a href="#" className={`text-gray-600 hover:${themeColor} text-xs transition-colors duration-200`}>
+              <span className="text-os-dim/30 text-[11px]">·</span>
+              <a href="#" className="text-os-dim hover:text-os-green text-[11px] font-mono transition-colors">
                 Terms
               </a>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600 text-xs font-mono">Visitors: {visitors.toLocaleString()}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-os-dim text-[10px] font-mono">Visitors: {visitors.toLocaleString()}</span>
+              <span className="text-os-dim/30">|</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-os-green status-pulse" />
+                <span className="text-os-dim text-[10px] font-mono">v1.0.3</span>
               </div>
-              <div className="h-3 w-[1px] bg-white/[0.06]"></div>
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400"></span>
-                </span>
-                <span className="text-gray-600 text-xs font-mono">v1.0.3</span>
-              </div>
-              <div className="h-3 w-[1px] bg-white/[0.06]"></div>
+              <span className="text-os-dim/30">|</span>
               <Clock />
-              <div className="h-3 w-[1px] bg-white/[0.06]"></div>
-              <span className="text-gray-600 text-xs font-medium">EN</span>
+              <span className="text-os-dim/30">|</span>
+              <span className="text-os-dim text-[10px] font-mono">EN</span>
             </div>
           </div>
-
-          {/* Bottom accent line */}
-          <div className="mt-4 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent"></div>
         </div>
-
-        {/* Floating Terminal Button */}
-        {showTerminal && !showFloatingTerminal && (
-          <button
-            onClick={() => {
-              setShowFloatingTerminal(true);
-              setShowTerminal(false);
-            }}
-            className={`fixed bottom-8 right-8 p-3 rounded-full ${themeBg} border ${themeBorder} hover:bg-white/10 transition-all duration-300 shadow-lg z-50`}
-            title="Minimize Terminal"
-          >
-            <Terminal size={20} className={themeColor} />
-          </button>
-        )}
-
-        {/* Floating Terminal Window */}
-        {showFloatingTerminal && (
-          <div className={`fixed bottom-8 right-8 w-80 bg-[#0a0e27]/95 border ${themeBorder} rounded-lg shadow-xl backdrop-blur-md z-50`}>
-            <div className={`flex justify-between items-center p-3 border-b ${themeBorder}`}>
-              <span className={`${themeColor} text-xs font-mono`}>Terminal</span>
-              <button
-                onClick={() => {
-                  setShowFloatingTerminal(false);
-                  setShowTerminal(true);
-                }}
-                className={`${themeColor}/60 hover:${themeColor} transition`}
-              >
-                ⛶
-              </button>
-            </div>
-            <div className={`h-40 bg-[#050816] overflow-y-auto ${themeBright} text-xs font-mono p-3 space-y-1`}>
-              {history.slice(-5).map((line, i) => (
-                <div key={i} className="text-gray-500">{line.text.substring(0, 40)}{line.text.length > 40 ? '...' : ''}</div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Floating Terminal Button */}
+      {showTerminal && !showFloatingTerminal && (
+        <button
+          onClick={() => {
+            setShowFloatingTerminal(true);
+            setShowTerminal(false);
+          }}
+          className="fixed bottom-8 right-8 p-3 rounded-full bg-os-green/10 border border-os-green/20 hover:bg-os-green/20 transition-all duration-300 shadow-lg z-50"
+          title="Minimize Terminal"
+        >
+          <Terminal size={20} className="text-os-green" />
+        </button>
+      )}
+
+      {/* Floating Terminal Window */}
+      {showFloatingTerminal && (
+        <div className="fixed bottom-8 right-8 w-80 os-window shadow-xl z-50">
+          <div className="os-titlebar">
+            <div className="os-dots">
+              <div className="os-dot close" />
+              <div className="os-dot minimize" />
+              <div className="os-dot maximize" />
+            </div>
+            <div className="os-title">Terminal (minimized)</div>
+            <button
+              onClick={() => {
+                setShowFloatingTerminal(false);
+                setShowTerminal(true);
+              }}
+              className="text-os-dim hover:text-os-green transition text-xs font-mono"
+            >
+              ⛶
+            </button>
+          </div>
+          <div className="h-40 bg-os-bg/50 overflow-y-auto text-os-green/70 text-xs font-mono p-3 space-y-1">
+            {history.slice(-5).map((line, i) => (
+              <div key={i} className="text-os-dim">{line.text.substring(0, 40)}{line.text.length > 40 ? '...' : ''}</div>
+            ))}
+          </div>
+        </div>
+      )}
     </footer>
   );
 }

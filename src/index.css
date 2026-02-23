@@ -1,3 +1,164 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    font-family: 'Ubuntu', system-ui, sans-serif;
+    background: #0a0a16;
+    color: #d0d0e0;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background: rgba(0, 255, 136, 0.25);
+    color: #fff;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0a0a16; }
+  ::-webkit-scrollbar-thumb { background: #2a2a50; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00ff88; }
+}
+
+/* ═══ OS WINDOW ═══ */
+.os-window {
+  background: #111120;
+  border: 1px solid #252545;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.os-window:hover {
+  border-color: #353560;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+
+.os-titlebar {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: #181830;
+  border-bottom: 1px solid #252545;
+  user-select: none;
+}
+.os-dots {
+  display: flex;
+  gap: 7px;
+  margin-right: 12px;
+}
+.os-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: filter 0.2s;
+}
+.os-dot:hover { filter: brightness(1.3); }
+.os-dot.close { background: #ff5f57; }
+.os-dot.minimize { background: #ffbd2e; }
+.os-dot.maximize { background: #28c840; }
+.os-title {
+  flex: 1;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #6a6a8a;
+  font-weight: 400;
+}
+
+/* ═══ DESKTOP BACKGROUND ═══ */
+.desktop-bg {
+  background-color: #0a0a16;
+  background-image:
+    radial-gradient(ellipse at 15% 50%, rgba(0, 255, 136, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 25%, rgba(0, 180, 216, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 90%, rgba(224, 64, 251, 0.02) 0%, transparent 50%),
+    linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+}
+
+/* ═══ SCANLINES ═══ */
+.scanlines::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.4;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.02) 2px,
+    rgba(0,0,0,0.02) 4px
+  );
+}
+
+/* ═══ TERMINAL CURSOR ═══ */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink::after {
+  content: '█';
+  color: #00ff88;
+  animation: blink 1s step-end infinite;
+  margin-left: 1px;
+}
+
+/* ═══ GLOW TEXT ═══ */
+.glow-green { color: #00ff88; text-shadow: 0 0 8px rgba(0,255,136,0.4); }
+.glow-cyan { color: #00b4d8; text-shadow: 0 0 8px rgba(0,180,216,0.4); }
+.glow-magenta { color: #e040fb; text-shadow: 0 0 8px rgba(224,64,251,0.4); }
+
+/* ═══ PROGRESS BARS ═══ */
+.os-progress {
+  height: 6px;
+  background: #1a1a30;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.os-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ═══ STATUS PULSE ═══ */
+@keyframes statusPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(0,255,136,0); }
+}
+.status-pulse { animation: statusPulse 2s infinite; }
+
+/* ═══ MARQUEE ═══ */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+/* ═══ FILE CARD ═══ */
+.file-card {
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.file-card:hover {
+  background: rgba(0, 255, 136, 0.03);
+  border-color: rgba(0, 255, 136, 0.12);
+}
+.file-card:active {
+  background: rgba(0, 255, 136, 0.06);
+}

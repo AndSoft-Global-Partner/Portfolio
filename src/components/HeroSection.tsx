@@ -1,5 +1,5 @@
-import { motion, useAnimation } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const partners = [
   { name: 'IBM', logo: '/1.png' },
@@ -9,132 +9,164 @@ const partners = [
   { name: 'Amazon', logo: '/5.png' },
 ];
 
-export default function HeroSection() {
+const infoLines = [
+  { label: 'OS', value: 'AndSoft OS v2.5 LTS' },
+  { label: 'Kernel', value: 'Innovation 6.8.0-andsoft' },
+  { label: 'Uptime', value: '5+ years of building solutions' },
+  { label: 'Packages', value: '50+ projects shipped worldwide' },
+  { label: 'Shell', value: 'React · Node.js · Python · Flutter' },
+  { label: 'Resolution', value: 'Pixel Perfect™' },
+  { label: 'CPU', value: 'Creative Engine @ ∞ GHz' },
+  { label: 'Memory', value: '30+ happy clients / ∞' },
+];
 
-  const controls = useAnimation();
-  const lastScroll = useRef(0);
+export default function HeroSection() {
+  const [phase, setPhase] = useState(0);
+  const [visibleInfoLines, setVisibleInfoLines] = useState(0);
 
   useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
-    // initial animation
-    controls.set({ x: 120, y: 0, opacity: 0 });
+    timers.push(setTimeout(() => setPhase(1), 600));
+    timers.push(setTimeout(() => setPhase(2), 1200));
 
-    controls.start({
-      x: 0,
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut"
-      }
+    infoLines.forEach((_, i) => {
+      timers.push(setTimeout(() => setVisibleInfoLines(i + 1), 1400 + i * 150));
     });
 
-    const handleScroll = () => {
+    timers.push(setTimeout(() => setPhase(3), 1400 + infoLines.length * 150 + 500));
 
-      const currentScroll = window.scrollY;
-
-      if (currentScroll > lastScroll.current) {
-
-        // scroll down → hide up
-        controls.start({
-          y: -80,
-          opacity: 0,
-          transition: { duration: 0.35 }
-        });
-
-      } else {
-
-        // scroll up → show from bottom
-        controls.start({
-          y: 0,
-          opacity: 1,
-          transition: {
-            duration: 0.5,
-            ease: "easeOut"
-          }
-        });
-
-      }
-
-      lastScroll.current = currentScroll;
-
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => window.removeEventListener("scroll", handleScroll);
-
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   return (
-
-    <section
-      id="home"
-      className="relative min-h-screen flex items-start md:items-center pt-24 md:pt-20 pb-32"
-    >
-
-      <div className="container mx-auto px-6 relative z-10">
-
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-
-          <motion.div
-            animate={controls}
-            className="space-y-4 max-w-lg"
-          >
-
-            <h1 className="text-4xl md:text-5xl font-medium text-white">
-
-              Innovative Technology
-              <br />
-
-              <span className="text-cyan-400">
-                Solutions
-              </span>
-
-            </h1>
-
-            <p className="text-gray-400">
-              Cutting-edge tools to grow and scale your business.
-            </p>
-
-          </motion.div>
-
+    <section id="home" className="px-3 md:px-6 pt-3 pb-2">
+      {/* Main Terminal Window */}
+      <div className="os-window max-w-5xl mx-auto">
+        <div className="os-titlebar">
+          <div className="os-dots">
+            <div className="os-dot close" />
+            <div className="os-dot minimize" />
+            <div className="os-dot maximize" />
+          </div>
+          <div className="os-title">
+            guest@andsoft-os — bash — 120×40
+          </div>
         </div>
 
-      </div>
-
-      {/* Partners */}
-      <div className="absolute bottom-6 left-0 w-full px-6">
-        <div className="container mx-auto">
-
-          <div className="relative overflow-hidden rounded-xl p-4 md:p-6 border border-white/15">
-
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6 place-items-center">
-
-              {partners.map((partner, index) => (
-
-                <div
-                  key={index}
-                  className="flex items-center justify-center w-40 h-24"
-                >
-
-                  <img
-                    src={partner.logo}
-                    alt={partner.name}
-                    className="max-h-8 md:max-h-10 object-contain opacity-90"
-                  />
-
-                </div>
-
-              ))}
-
-            </div>
-
+        {/* Terminal content */}
+        <div className="p-4 md:p-8 font-mono text-sm leading-relaxed min-h-[55vh] md:min-h-[65vh] bg-os-bg/50">
+          {/* Command line */}
+          <div className="flex flex-wrap gap-0">
+            <span className="text-os-green">guest@andsoft-os</span>
+            <span className="text-os-muted">:</span>
+            <span className="text-os-cyan">~</span>
+            <span className="text-os-muted">$&nbsp;</span>
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              className="text-os-text"
+            >
+              neofetch
+            </motion.span>
           </div>
 
+          {/* Big name */}
+          {phase >= 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="mt-8 mb-2"
+            >
+              <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold font-mono tracking-tighter glow-green leading-none">
+                ANDSOFT
+              </h1>
+              <p className="text-os-muted text-[10px] md:text-xs mt-2 tracking-[0.3em] uppercase">
+                Digital Studio — Innovative Technology Solutions
+              </p>
+              <div className="w-full h-px bg-os-border mt-4" />
+            </motion.div>
+          )}
+
+          {/* Info lines */}
+          {phase >= 2 && (
+            <div className="mt-4 space-y-1">
+              {infoLines.slice(0, visibleInfoLines).map((line, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex flex-col sm:flex-row"
+                >
+                  <span className="text-os-cyan w-28 md:w-32 flex-shrink-0 text-xs md:text-sm">{line.label}</span>
+                  <span className="text-os-text text-xs md:text-sm">{line.value}</span>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {/* Second command + output */}
+          {phase >= 3 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mt-8"
+            >
+              <div className="flex flex-wrap gap-0">
+                <span className="text-os-green">guest@andsoft-os</span>
+                <span className="text-os-muted">:</span>
+                <span className="text-os-cyan">~</span>
+                <span className="text-os-muted">$&nbsp;</span>
+                <span className="text-os-text">cat /etc/motd</span>
+              </div>
+              <p className="text-os-text mt-2 text-sm md:text-base">
+                Cutting-edge tools to grow and scale your business.
+              </p>
+              <p className="text-os-dim mt-1 text-xs md:text-sm">
+                We build the impossible. We ship the extraordinary.
+              </p>
+
+              {/* Final blinking cursor */}
+              <div className="mt-6 flex flex-wrap gap-0">
+                <span className="text-os-green">guest@andsoft-os</span>
+                <span className="text-os-muted">:</span>
+                <span className="text-os-cyan">~</span>
+                <span className="text-os-muted">$&nbsp;</span>
+                <span className="cursor-blink" />
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
+      {/* Trusted Nodes (Partners) */}
+      <div className="max-w-5xl mx-auto mt-3">
+        <div className="os-window">
+          <div className="os-titlebar py-2">
+            <div className="os-dots">
+              <div className="os-dot close" />
+              <div className="os-dot minimize" />
+              <div className="os-dot maximize" />
+            </div>
+            <div className="os-title">
+              /etc/network/trusted-nodes
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 place-items-center">
+              {partners.map((partner, i) => (
+                <div key={i} className="flex items-center justify-center h-12 opacity-40 hover:opacity-90 transition-opacity duration-300 grayscale hover:grayscale-0">
+                  <img src={partner.logo} alt={partner.name} className="max-h-8 object-contain" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

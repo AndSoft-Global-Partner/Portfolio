@@ -1,267 +1,218 @@
-import { useState, useEffect, useRef } from "react";
-import { ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { ExternalLink, Folder, Grid, List, ChevronRight } from "lucide-react";
+
+const projects = [
+  {
+    name: "E-Commerce Platform",
+    description: "A comprehensive online shopping experience with AI-powered recommendations and real-time inventory.",
+    image: "/1.png",
+    type: "Web",
+    size: "24.6 MB",
+    modified: "Jan 15, 2025",
+    tech: ["React", "Node.js", "PostgreSQL"],
+  },
+  {
+    name: "HealthTrack App",
+    description: "Fitness and nutrition tracking mobile app with real-time insights and personalized plans.",
+    image: "/2.png",
+    type: "Mobile",
+    size: "18.2 MB",
+    modified: "Feb 8, 2025",
+    tech: ["Flutter", "Firebase", "ML"],
+  },
+  {
+    name: "Corporate Portal",
+    description: "Internal communication and document management system for enterprise teams.",
+    image: "/5.png",
+    type: "Web",
+    size: "31.4 MB",
+    modified: "Dec 20, 2024",
+    tech: ["React", "Python", "AWS"],
+  },
+  {
+    name: "Financial Dashboard",
+    description: "Real-time financial analytics, reporting platform and data visualization.",
+    image: "/4.png",
+    type: "Web",
+    size: "22.1 MB",
+    modified: "Nov 5, 2024",
+    tech: ["React", "D3.js", "Node.js"],
+  },
+];
+
+const sidebarItems = [
+  { label: "Home", active: false },
+  { label: "Projects", active: true },
+  { label: "Recent", active: false },
+  { label: "Favorites", active: false },
+];
 
 export default function Projects() {
-  const projects = [
-    {
-      title: "E-Commerce Platform",
-      description: "A comprehensive online shopping experience.",
-      color: "from-blue-500/20 to-cyan-500/20",
-      image: "/1.png",
-      type: "Website"
-    },
-    {
-      title: "HealthTrack App",
-      description: "Fitness and nutrition tracking mobile app.",
-      color: "from-purple-500/20 to-pink-500/20",
-      image: "/2.png",
-      type: "App"
-    },
-    {
-      title: "Corporate Portal",
-      description: "Internal communication and document system.",
-      color: "from-emerald-500/20 to-teal-500/20",
-      image: "/5.png",
-      type: "Website"
-    },
-    {
-      title: "Financial Dashboard",
-      description: "Real-time financial analytics platform.",
-      color: "from-orange-500/20 to-red-500/20",
-      image: "/4.png",
-      type: "Website"
-    }
-  ];
-
-  // Rotation angle (continuous)
-  const [rotation, setRotation] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-
-  // Auto rotate every 5 seconds
-  useEffect(() => {
-    if (isPaused) return;
-
-    const angleStep = 360 / projects.length;
-
-    const timer = setInterval(() => {
-      setRotation((prev) => prev - angleStep);
-    }, 3000);
-
-    return () => clearInterval(timer);
-  }, [projects.length, isPaused]);
-
-  const getCardStyle = (index: number) => {
-    const total = projects.length;
-    const angle = 360 / total;
-    const rotate = angle * index + rotation;
-
-    const baseRadius = 420;
-
-    // normalize angle
-    let normalized = rotate % 360;
-    if (normalized < 0) normalized += 360;
-
-    // distance from front
-    const distance = Math.min(
-      Math.abs(normalized),
-      Math.abs(360 - normalized)
-    );
-
-    // visual adjustments
-    let scale = 1;
-    let opacity = 1;
-    let radius = baseRadius;
-
-    if (distance > 80) {
-      scale = 0.9;
-      opacity = 0.5;
-      radius = baseRadius - 40;
-    } else if (distance > 40) {
-      scale = 0.96;
-      opacity = 0.75;
-      radius = baseRadius - 20;
-    }
-
-    return {
-      transform: `rotateY(${rotate}deg) translateZ(${radius}px) scale(${scale})`,
-      opacity,
-      transition: "transform 1.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s",
-      position: "absolute" as const,
-      width: "100%",
-      maxWidth: "380px",
-      height: "288px"
-    };
-  };
-
-  // Check if card is visible (not on the back)
-  const isCardVisible = (index: number) => {
-    const total = projects.length;
-    const angle = 360 / total;
-    const rotate = (angle * index + rotation) % 360;
-    const normalizedRotate = rotate < 0 ? rotate + 360 : rotate;
-    
-    // Card is visible if it's not in the back (around 180 degrees)
-    // Back range: 120 to 240 degrees (adjusted for smooth transition)
-    return !(normalizedRotate > 120 && normalizedRotate < 240);
-  };
-
-  // Check if card is at front (text only visible here)
-  const isFrontCard = (index: number) => {
-    const total = projects.length;
-    const angle = 360 / total;
-    const rotate = (angle * index + rotation) % 360;
-    const normalized = rotate < 0 ? rotate + 360 : rotate;
-
-    // Only show text if near front (±25deg)
-    return normalized < 25 || normalized > 335;
-  };
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   return (
-    <section 
-      className="py-24 overflow-hidden relative"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
-      <div className="container mx-auto px-6">
-        <div className="mb-16 text-center">
-          <h2 className="text-4xl md:text-5xl font-semibold text-white mb-6">
-            Our <span className="text-cyan-400">Featured Work</span>
-          </h2>
-        </div>
-
-        <div className="hidden md:block relative h-[460px] perspective">
-          <div className="carousel">
-            {projects.map((project, index) => (
-              <div key={index} style={getCardStyle(index)}>
-                <div
-                  className="rounded-[2.5rem] overflow-hidden border border-white/10 shadow-xl relative h-72 group"
-                  style={{
-                    filter: isFrontCard(index)
-                      ? "brightness(1.05)"
-                      : "brightness(0.75)"
-                  }}
-                >
-                  <img 
-                    src={project.image} 
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                  />
-                  
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                  
-                  <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                    {isFrontCard(index) && (
-                      <>
-                        <h3 className="text-lg font-bold text-white mb-2">
-                          {project.title}
-                        </h3>
-
-                        <p className="text-white/80 mb-3 text-xs leading-relaxed line-clamp-2">
-                          {project.description}
-                        </p>
-
-                        <div className="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors">
-                          <span className="text-xs font-semibold mr-2">
-                            View Case Study
-                          </span>
-                          <ExternalLink size={14} />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
+    <section id="projects" className="px-3 md:px-6 py-3">
+      <div className="os-window max-w-5xl mx-auto">
+        {/* Title bar */}
+        <div className="os-titlebar">
+          <div className="os-dots">
+            <div className="os-dot close" />
+            <div className="os-dot minimize" />
+            <div className="os-dot maximize" />
+          </div>
+          <div className="os-title">
+            /home/andsoft/projects — Files
           </div>
         </div>
 
-        <div className="hidden md:flex justify-center mt-10 gap-2">
-          {projects.map((_, i) => {
-            const angle = (360 / projects.length) * i + rotation;
-            const normalized = ((angle % 360) + 360) % 360;
-            const isActive = normalized < 30 || normalized > 330;
+        {/* Toolbar */}
+        <div className="flex items-center justify-between px-4 md:px-6 py-2 border-b border-os-border bg-os-titlebar/30">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-1 font-mono text-[11px]">
+            <span className="text-os-muted hover:text-os-text cursor-pointer transition-colors">home</span>
+            <ChevronRight size={10} className="text-os-dim" />
+            <span className="text-os-muted hover:text-os-text cursor-pointer transition-colors">andsoft</span>
+            <ChevronRight size={10} className="text-os-dim" />
+            <span className="text-os-text">projects</span>
+          </div>
 
-            return (
+          {/* View toggles */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-1 rounded transition-colors ${viewMode === 'grid' ? 'text-os-green bg-os-green/10' : 'text-os-dim hover:text-os-muted'}`}
+            >
+              <Grid size={14} />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1 rounded transition-colors ${viewMode === 'list' ? 'text-os-green bg-os-green/10' : 'text-os-dim hover:text-os-muted'}`}
+            >
+              <List size={14} />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex min-h-[400px]">
+          {/* Sidebar */}
+          <div className="hidden md:block w-44 border-r border-os-border/50 py-3 px-2 bg-os-bg/30 flex-shrink-0">
+            {sidebarItems.map(item => (
               <div
-                key={i}
-                className={`h-1.5 rounded-full transition-all duration-500 ${
-                  isActive ? "w-8 bg-cyan-400" : "w-2 bg-white/20"
+                key={item.label}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-[11px] font-mono cursor-pointer transition-colors ${
+                  item.active
+                    ? 'text-os-green bg-os-green/5'
+                    : 'text-os-muted hover:text-os-text hover:bg-white/[0.02]'
                 }`}
-              />
-            );
-          })}
-        </div>
-
-        {/* Mobile slider */}
-        <div className="relative md:hidden overflow-hidden px-6">
-          <div className="scroller-inner">
-            {[...projects, ...projects].map((project, index) => (
-              <div
-                key={index}
-                className="min-w-[260px] mr-4 rounded-3xl overflow-hidden border border-white/10 shadow-xl relative h-64 flex-shrink-0"
               >
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-full object-cover"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-
-                <div className="absolute inset-0 p-5 flex flex-col justify-end">
-                  <h3 className="text-lg font-bold text-white mb-1">
-                    {project.title}
-                  </h3>
-
-                  <p className="text-white/80 text-xs line-clamp-2">
-                    {project.description}
-                  </p>
-                </div>
+                <Folder size={13} />
+                {item.label}
               </div>
             ))}
+            <div className="mt-6 px-3">
+              <div className="text-[9px] font-mono text-os-dim tracking-wider uppercase mb-2">Storage</div>
+              <div className="os-progress">
+                <div className="os-progress-fill bg-os-cyan" style={{ width: '64%' }} />
+              </div>
+              <div className="text-[9px] font-mono text-os-dim mt-1">128 GB / 200 GB</div>
+            </div>
           </div>
+
+          {/* Main content */}
+          <div className="flex-1 p-4 md:p-6">
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {projects.map((project, i) => (
+                  <motion.div
+                    key={project.name}
+                    initial={{ opacity: 0, y: 15 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: i * 0.08, ease: "easeOut" as const }}
+                    onClick={() => setSelectedIdx(selectedIdx === i ? null : i)}
+                    className={`file-card p-3 ${
+                      selectedIdx === i ? 'bg-os-green/[0.06] !border-os-green/20' : ''
+                    }`}
+                  >
+                    {/* Thumbnail */}
+                    <div className="aspect-video rounded-md bg-os-bg overflow-hidden mb-3 border border-os-border/30">
+                      <img
+                        src={project.image}
+                        alt={project.name}
+                        className="w-full h-full object-cover opacity-70 hover:opacity-100 transition-opacity duration-300"
+                      />
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex items-start gap-2">
+                      <Folder size={16} className="text-os-cyan mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-medium text-os-text truncate">{project.name}</h3>
+                        <p className="text-[11px] text-os-muted mt-0.5 line-clamp-2">{project.description}</p>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {project.tech.map(t => (
+                            <span key={t} className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-os-border/30 text-os-dim">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="font-mono text-[9px] text-os-dim">{project.size}</span>
+                          <span className="font-mono text-[9px] text-os-dim">{project.modified}</span>
+                          <a href="#" className="font-mono text-[9px] text-os-cyan hover:text-os-green transition-colors flex items-center gap-1">
+                            Open <ExternalLink size={8} />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-0.5">
+                {/* List header */}
+                <div className="grid grid-cols-[1fr_80px_100px_80px] gap-2 px-3 py-1.5 text-[10px] font-mono text-os-dim tracking-wider uppercase border-b border-os-border/30">
+                  <div>Name</div>
+                  <div>Type</div>
+                  <div>Modified</div>
+                  <div>Size</div>
+                </div>
+                {projects.map((project, i) => (
+                  <motion.div
+                    key={project.name}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.2, delay: i * 0.05 }}
+                    onClick={() => setSelectedIdx(selectedIdx === i ? null : i)}
+                    className={`grid grid-cols-[1fr_80px_100px_80px] gap-2 items-center px-3 py-2.5 rounded cursor-pointer transition-colors text-[11px] font-mono ${
+                      selectedIdx === i
+                        ? 'bg-os-green/[0.06] text-os-text'
+                        : 'text-os-muted hover:bg-white/[0.02]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <Folder size={14} className="text-os-cyan flex-shrink-0" />
+                      <span className="truncate">{project.name}</span>
+                    </div>
+                    <div>{project.type}</div>
+                    <div className="text-os-dim">{project.modified}</div>
+                    <div className="text-os-dim">{project.size}</div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Status bar */}
+        <div className="px-4 md:px-6 py-2 border-t border-os-border bg-os-titlebar/30 flex items-center justify-between font-mono text-[10px] text-os-dim">
+          <span>{projects.length} items · {selectedIdx !== null ? '1 selected' : 'None selected'}</span>
+          <span>Free: 72 GB</span>
         </div>
       </div>
-
-      <style>{`
-        .perspective {
-          perspective: 1700px;
-        }
-
-        .carousel {
-          width: 100%;
-          height: 100%;
-          position: relative;
-          transform-style: preserve-3d;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .scroller-inner {
-          display: flex;
-          width: max-content;
-          animation: scrollLoop 20s linear infinite;
-        }
-
-        @keyframes scrollLoop {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(-50%);
-          }
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </section>
   );
 }
