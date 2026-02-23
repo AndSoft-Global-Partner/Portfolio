@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useI18n } from "../i18n";
+import { useI18n } from "../useI18n";
 
 const partners = [
   { name: 'IBM', logo: '/1.png' },

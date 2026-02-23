@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Globe, Wifi, Battery, Volume2, Menu, X, Sun, Moon } from 'lucide-react';
-import { useI18n } from '../i18n';
-import { useTheme } from '../theme';
+import { useI18n } from '../useI18n';
+import { useTheme } from '../useTheme';
 
 export default function Header() {
   const { lang, toggleLang, t } = useI18n();

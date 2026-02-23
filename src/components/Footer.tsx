@@ -1,7 +1,7 @@
 import { Facebook, Twitter, Linkedin, Github, Mail, MapPin, Phone, Terminal, Activity, Shield, Zap, Server } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import Clock from './Clock';
-import { useI18n } from '../i18n';
+import { useI18n } from '../useI18n';
 
 export default function Footer() {
   const { t } = useI18n();

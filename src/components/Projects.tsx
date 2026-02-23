@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, Folder, Grid, List, ChevronRight } from "lucide-react";
-import { useI18n } from "../i18n";
+import { useI18n } from "../useI18n";
 
 const projectKeys = [
   {

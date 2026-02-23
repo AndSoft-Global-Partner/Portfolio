@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useState, useRef } from "react";
-import { useI18n } from "../i18n";
+import { useI18n } from "../useI18n";
 
 const processes = [
   { pid: 1001, name: "react", display: "React", cpu: 89, mem: 72, color: "#61DAFB", src: "/react.png" },

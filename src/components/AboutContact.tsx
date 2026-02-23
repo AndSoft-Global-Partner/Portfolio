@@ -1,7 +1,7 @@
 import { Phone, Mail, MapPin, Send, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { useI18n } from '../i18n';
+import { useI18n } from '../useI18n';
 
 export default function AboutContact() {
   const { t } = useI18n();
