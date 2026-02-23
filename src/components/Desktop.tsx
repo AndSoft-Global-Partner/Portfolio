@@ -3,6 +3,8 @@ import { useWindowManager, type AppId } from '../windowManager';
 import OSWindow from './OSWindow';
 import { useI18n } from '../useI18n';
 import TerminalEmulator from './TerminalEmulator';
+import { useState } from 'react';
+import { Send } from 'lucide-react';
 
 /* ─── System Monitor (technologies) ─── */
 const processes = [
@@ -115,47 +117,94 @@ function FilesApp() {
 /* ─── Mail (contact) ─── */
 function MailApp() {
   const { t } = useI18n();
+  const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !subject || !body) return;
+    setFormStatus('sending');
+    setTimeout(() => setFormStatus('sent'), 1500);
+    setTimeout(() => {
+      setFormStatus('idle');
+      setName(''); setEmail(''); setSubject(''); setBody('');
+    }, 4000);
+  };
 
   return (
-    <div className="bg-os-bg h-full flex flex-col font-mono text-[12px]">
+    <form onSubmit={handleSubmit} className="bg-os-bg h-full flex flex-col font-mono text-[12px]">
       {/* Mail headers */}
-      <div className="border-b border-os-border">
+      <div className="border-b border-os-border flex-shrink-0">
         <div className="flex items-center gap-2 px-4 py-2 border-b border-os-border/50">
-          <span className="text-os-dim w-12 text-right text-[10px]">{t('contact.to')}:</span>
-          <span className="text-os-text">hello@andsoft.mn</span>
+          <span className="text-os-dim w-14 text-right text-[10px]">{t('contact.to')}</span>
+          <span className="text-os-cyan">contact@andsoft.com</span>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 border-b border-os-border/50">
-          <span className="text-os-dim w-12 text-right text-[10px]">From:</span>
+          <span className="text-os-dim w-14 text-right text-[10px]">{t('contact.fromName')}</span>
           <input
-            className="flex-1 bg-transparent text-os-text placeholder:text-os-dim/50 outline-none"
+            type="text"
+            required
+            value={name}
+            onChange={e => setName(e.target.value)}
+            className="flex-1 bg-transparent text-os-text placeholder:text-os-dim/40 outline-none"
             placeholder={t('contact.yourName')}
           />
         </div>
         <div className="flex items-center gap-2 px-4 py-2 border-b border-os-border/50">
-          <span className="text-os-dim w-12 text-right text-[10px]">Re:</span>
+          <span className="text-os-dim w-14 text-right text-[10px]">{t('contact.replyTo')}</span>
           <input
-            className="flex-1 bg-transparent text-os-text placeholder:text-os-dim/50 outline-none"
-            placeholder={t('contact.subject')}
+            type="email"
+            required
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="flex-1 bg-transparent text-os-text placeholder:text-os-dim/40 outline-none"
+            placeholder={t('contact.yourEmail')}
+          />
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2">
+          <span className="text-os-dim w-14 text-right text-[10px]">{t('contact.subject')}</span>
+          <input
+            type="text"
+            required
+            value={subject}
+            onChange={e => setSubject(e.target.value)}
+            className="flex-1 bg-transparent text-os-text placeholder:text-os-dim/40 outline-none"
+            placeholder={t('contact.projectInquiry')}
           />
         </div>
       </div>
 
       {/* Body */}
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 min-h-0">
         <textarea
-          className="w-full h-full bg-transparent text-os-text placeholder:text-os-dim/50 outline-none resize-none"
+          required
+          value={body}
+          onChange={e => setBody(e.target.value)}
+          className="w-full h-full bg-transparent text-os-text placeholder:text-os-dim/40 outline-none resize-none"
           placeholder={t('contact.tellUs')}
         />
       </div>
 
       {/* Send bar */}
-      <div className="px-4 py-2 border-t border-os-border flex justify-between items-center">
-        <span className="text-[10px] text-os-dim">📎 Attach · 🔗 Link</span>
-        <button className="px-4 py-1 rounded bg-os-green/20 text-os-green text-[11px] hover:bg-os-green/30 transition-colors">
-          {t('contact.send')} ⌘↵
+      <div className="px-4 py-2.5 border-t border-os-border flex justify-between items-center flex-shrink-0">
+        <div className="text-[10px]">
+          {formStatus === 'sent' && <span className="text-os-green">{t('contact.sent')}</span>}
+          {formStatus === 'sending' && <span className="text-os-cyan">{t('contact.sending')}</span>}
+          {formStatus === 'idle' && <span className="text-os-dim">{t('contact.allRequired')}</span>}
+        </div>
+        <button
+          type="submit"
+          disabled={formStatus === 'sending'}
+          className="flex items-center gap-2 px-4 py-1.5 rounded bg-os-green/10 border border-os-green/20 text-os-green text-[11px] hover:bg-os-green/20 hover:border-os-green/30 transition-colors disabled:opacity-40"
+        >
+          <Send size={12} />
+          {t('contact.send')}
         </button>
       </div>
-    </div>
+    </form>
   );
 }
 
