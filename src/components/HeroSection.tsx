@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useI18n } from "../i18n";
 
 const partners = [
   { name: 'IBM', logo: '/1.png' },
@@ -9,18 +10,19 @@ const partners = [
   { name: 'Amazon', logo: '/5.png' },
 ];
 
-const infoLines = [
-  { label: 'OS', value: 'AndSoft OS v2.5 LTS' },
-  { label: 'Kernel', value: 'Innovation 6.8.0-andsoft' },
-  { label: 'Uptime', value: '5+ years of building solutions' },
-  { label: 'Packages', value: '50+ projects shipped worldwide' },
-  { label: 'Shell', value: 'React · Node.js · Python · Flutter' },
-  { label: 'Resolution', value: 'Pixel Perfect™' },
-  { label: 'CPU', value: 'Creative Engine @ ∞ GHz' },
-  { label: 'Memory', value: '30+ happy clients / ∞' },
+const infoLineKeys = [
+  { label: 'OS', valueKey: 'info.os' as const },
+  { label: 'Kernel', valueKey: 'info.kernel' as const },
+  { label: 'Uptime', valueKey: 'info.uptime' as const },
+  { label: 'Packages', valueKey: 'info.packages' as const },
+  { label: 'Shell', valueKey: 'info.shell' as const },
+  { label: 'Resolution', valueKey: 'info.resolution' as const },
+  { label: 'CPU', valueKey: 'info.cpu' as const },
+  { label: 'Memory', valueKey: 'info.memory' as const },
 ];
 
 export default function HeroSection() {
+  const { t } = useI18n();
   const [phase, setPhase] = useState(0);
   const [visibleInfoLines, setVisibleInfoLines] = useState(0);
 
@@ -30,11 +32,11 @@ export default function HeroSection() {
     timers.push(setTimeout(() => setPhase(1), 600));
     timers.push(setTimeout(() => setPhase(2), 1200));
 
-    infoLines.forEach((_, i) => {
+    infoLineKeys.forEach((_, i) => {
       timers.push(setTimeout(() => setVisibleInfoLines(i + 1), 1400 + i * 150));
     });
 
-    timers.push(setTimeout(() => setPhase(3), 1400 + infoLines.length * 150 + 500));
+    timers.push(setTimeout(() => setPhase(3), 1400 + infoLineKeys.length * 150 + 500));
 
     return () => timers.forEach(clearTimeout);
   }, []);
@@ -50,7 +52,7 @@ export default function HeroSection() {
             <div className="os-dot maximize" />
           </div>
           <div className="os-title">
-            guest@andsoft-os — bash — 120×40
+            {t('hero.title')}
           </div>
         </div>
 
@@ -84,7 +86,7 @@ export default function HeroSection() {
                 ANDSOFT
               </h1>
               <p className="text-os-muted text-[10px] md:text-xs mt-2 tracking-[0.3em] uppercase">
-                Digital Studio — Innovative Technology Solutions
+                {t('hero.subtitle')}
               </p>
               <div className="w-full h-px bg-os-border mt-4" />
             </motion.div>
@@ -93,7 +95,7 @@ export default function HeroSection() {
           {/* Info lines */}
           {phase >= 2 && (
             <div className="mt-4 space-y-1">
-              {infoLines.slice(0, visibleInfoLines).map((line, i) => (
+              {infoLineKeys.slice(0, visibleInfoLines).map((line, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, x: -5 }}
@@ -102,7 +104,7 @@ export default function HeroSection() {
                   className="flex flex-col sm:flex-row"
                 >
                   <span className="text-os-cyan w-28 md:w-32 flex-shrink-0 text-xs md:text-sm">{line.label}</span>
-                  <span className="text-os-text text-xs md:text-sm">{line.value}</span>
+                  <span className="text-os-text text-xs md:text-sm">{t(line.valueKey)}</span>
                 </motion.div>
               ))}
             </div>
@@ -124,10 +126,10 @@ export default function HeroSection() {
                 <span className="text-os-text">cat /etc/motd</span>
               </div>
               <p className="text-os-text mt-2 text-sm md:text-base">
-                Cutting-edge tools to grow and scale your business.
+                {t('hero.motd')}
               </p>
               <p className="text-os-dim mt-1 text-xs md:text-sm">
-                We build the impossible. We ship the extraordinary.
+                {t('hero.motdSub')}
               </p>
 
               {/* Final blinking cursor */}
@@ -153,7 +155,7 @@ export default function HeroSection() {
               <div className="os-dot maximize" />
             </div>
             <div className="os-title">
-              /etc/network/trusted-nodes
+              {t('hero.trustedNodes')}
             </div>
           </div>
           <div className="p-4">

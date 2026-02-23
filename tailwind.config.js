@@ -1,23 +1,24 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         os: {
-          bg: '#0a0a16',
-          panel: '#0e0e1a',
-          window: '#111120',
-          titlebar: '#181830',
-          border: '#252545',
-          green: '#00ff88',
-          cyan: '#00b4d8',
-          magenta: '#e040fb',
-          yellow: '#ffbd2e',
-          red: '#ff5f57',
-          text: '#d0d0e0',
-          muted: '#7a7a9a',
-          dim: '#4a4a6a',
+          bg: 'var(--os-bg)',
+          panel: 'var(--os-panel)',
+          window: 'var(--os-window)',
+          titlebar: 'var(--os-titlebar)',
+          border: 'var(--os-border)',
+          green: 'var(--os-green)',
+          cyan: 'var(--os-cyan)',
+          magenta: 'var(--os-magenta)',
+          yellow: 'var(--os-yellow)',
+          red: 'var(--os-red)',
+          text: 'var(--os-text)',
+          muted: 'var(--os-muted)',
+          dim: 'var(--os-dim)',
         },
       },
       fontFamily: {

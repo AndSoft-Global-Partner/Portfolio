@@ -1,15 +1,17 @@
 import { Phone, Mail, MapPin, Send, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-
-const contactInfo = [
-  { icon: Phone, label: "Phone", value: "+976 99119000", href: "tel:+97699119000" },
-  { icon: Mail, label: "Email", value: "contact@andsoft.com", href: "mailto:contact@andsoft.com" },
-  { icon: MapPin, label: "Location", value: "Embassy One, 10th Floor", href: "https://maps.app.goo.gl/AnQqmdH7yEd2PeqDA" },
-];
+import { useI18n } from '../i18n';
 
 export default function AboutContact() {
+  const { t } = useI18n();
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+
+  const contactInfo = [
+    { icon: Phone, label: t('contact.phone'), value: "+976 99119000", href: "tel:+97699119000" },
+    { icon: Mail, label: t('contact.email'), value: "contact@andsoft.com", href: "mailto:contact@andsoft.com" },
+    { icon: MapPin, label: t('contact.location'), value: "Embassy One, 10th Floor", href: "https://maps.app.goo.gl/AnQqmdH7yEd2PeqDA" },
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +42,7 @@ export default function AboutContact() {
               </div>
               <div className="os-title">
                 <Settings size={10} className="inline mr-1" />
-                System Settings — Network
+                {t('contact.settings')}
               </div>
             </div>
 
@@ -85,7 +87,7 @@ export default function AboutContact() {
                 <div className="os-dot maximize" />
               </div>
               <div className="os-title">
-                Maps — Ulaanbaatar, Mongolia
+                {t('contact.map')}
               </div>
             </div>
             <div className="relative h-[180px] group">
@@ -107,6 +109,8 @@ export default function AboutContact() {
                 }}
                 allowFullScreen
                 loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                sandbox="allow-scripts allow-same-origin allow-popups"
                 className="opacity-40 group-hover:opacity-70 transition-opacity duration-500"
               />
             </div>
@@ -130,35 +134,35 @@ export default function AboutContact() {
               </div>
               <div className="os-title">
                 <Mail size={10} className="inline mr-1" />
-                Compose — New Message
+                {t('contact.compose')}
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 flex-1 flex flex-col">
               {/* To field */}
               <div className="flex items-center gap-2 pb-3 border-b border-os-border/50">
-                <span className="font-mono text-[11px] text-os-dim w-12">To:</span>
+                <span className="font-mono text-[11px] text-os-dim w-12">{t('contact.to')}</span>
                 <span className="font-mono text-[11px] text-os-cyan">contact@andsoft.com</span>
               </div>
 
               {/* Name + Email */}
               <div className="grid md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-mono text-[10px] text-os-dim tracking-wider uppercase mb-1.5">From (Name)</label>
+                  <label className="block font-mono text-[10px] text-os-dim tracking-wider uppercase mb-1.5">{t('contact.fromName')}</label>
                   <input
                     type="text"
                     required
-                    placeholder="Your name"
+                    placeholder={t('contact.yourName')}
                     className="w-full bg-os-bg/50 border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim/40
                       focus:outline-none focus:border-os-green/40 focus:ring-1 focus:ring-os-green/10 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block font-mono text-[10px] text-os-dim tracking-wider uppercase mb-1.5">Reply-To</label>
+                  <label className="block font-mono text-[10px] text-os-dim tracking-wider uppercase mb-1.5">{t('contact.replyTo')}</label>
                   <input
                     type="email"
                     required
-                    placeholder="your@email.com"
+                    placeholder={t('contact.yourEmail')}
                     className="w-full bg-os-bg/50 border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim/40
                       focus:outline-none focus:border-os-cyan/40 focus:ring-1 focus:ring-os-cyan/10 transition-colors"
                   />
@@ -167,11 +171,11 @@ export default function AboutContact() {
 
               {/* Subject */}
               <div>
-                <label className="block font-mono text-[10px] text-os-dim tracking-wider uppercase mb-1.5">Subject</label>
+                <label className="block font-mono text-[10px] text-os-dim tracking-wider uppercase mb-1.5">{t('contact.subject')}</label>
                 <input
                   type="text"
                   required
-                  placeholder="Project inquiry"
+                  placeholder={t('contact.projectInquiry')}
                   className="w-full bg-os-bg/50 border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim/40
                     focus:outline-none focus:border-os-magenta/40 focus:ring-1 focus:ring-os-magenta/10 transition-colors"
                 />
@@ -179,11 +183,11 @@ export default function AboutContact() {
 
               {/* Message */}
               <div className="flex-1">
-                <label className="block font-mono text-[10px] text-os-dim tracking-wider uppercase mb-1.5">Body</label>
+                <label className="block font-mono text-[10px] text-os-dim tracking-wider uppercase mb-1.5">{t('contact.body')}</label>
                 <textarea
                   required
                   rows={6}
-                  placeholder="Tell us about your project..."
+                  placeholder={t('contact.tellUs')}
                   className="w-full h-full min-h-[120px] bg-os-bg/50 border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim/40 resize-none
                     focus:outline-none focus:border-os-green/40 focus:ring-1 focus:ring-os-green/10 transition-colors"
                 />
@@ -192,9 +196,9 @@ export default function AboutContact() {
               {/* Send bar */}
               <div className="flex items-center justify-between pt-2 border-t border-os-border/50">
                 <div className="font-mono text-[10px]">
-                  {formStatus === 'sent' && <span className="text-os-green">✓ Message sent successfully</span>}
-                  {formStatus === 'sending' && <span className="text-os-cyan">Sending...</span>}
-                  {formStatus === 'idle' && <span className="text-os-dim">All fields required</span>}
+                  {formStatus === 'sent' && <span className="text-os-green">{t('contact.sent')}</span>}
+                  {formStatus === 'sending' && <span className="text-os-cyan">{t('contact.sending')}</span>}
+                  {formStatus === 'idle' && <span className="text-os-dim">{t('contact.allRequired')}</span>}
                 </div>
                 <button
                   type="submit"
@@ -204,7 +208,7 @@ export default function AboutContact() {
                     disabled:opacity-40 font-mono text-[11px] text-os-green"
                 >
                   <Send size={12} />
-                  Send
+                  {t('contact.send')}
                 </button>
               </div>
             </form>

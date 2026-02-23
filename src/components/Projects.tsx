@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, Folder, Grid, List, ChevronRight } from "lucide-react";
+import { useI18n } from "../i18n";
 
-const projects = [
+const projectKeys = [
   {
-    name: "E-Commerce Platform",
-    description: "A comprehensive online shopping experience with AI-powered recommendations and real-time inventory.",
+    nameKey: 'project.ecommerce.name' as const,
+    descKey: 'project.ecommerce.desc' as const,
     image: "/1.png",
     type: "Web",
     size: "24.6 MB",
@@ -13,8 +14,8 @@ const projects = [
     tech: ["React", "Node.js", "PostgreSQL"],
   },
   {
-    name: "HealthTrack App",
-    description: "Fitness and nutrition tracking mobile app with real-time insights and personalized plans.",
+    nameKey: 'project.health.name' as const,
+    descKey: 'project.health.desc' as const,
     image: "/2.png",
     type: "Mobile",
     size: "18.2 MB",
@@ -22,8 +23,8 @@ const projects = [
     tech: ["Flutter", "Firebase", "ML"],
   },
   {
-    name: "Corporate Portal",
-    description: "Internal communication and document management system for enterprise teams.",
+    nameKey: 'project.corporate.name' as const,
+    descKey: 'project.corporate.desc' as const,
     image: "/5.png",
     type: "Web",
     size: "31.4 MB",
@@ -31,8 +32,8 @@ const projects = [
     tech: ["React", "Python", "AWS"],
   },
   {
-    name: "Financial Dashboard",
-    description: "Real-time financial analytics, reporting platform and data visualization.",
+    nameKey: 'project.financial.name' as const,
+    descKey: 'project.financial.desc' as const,
     image: "/4.png",
     type: "Web",
     size: "22.1 MB",
@@ -41,16 +42,17 @@ const projects = [
   },
 ];
 
-const sidebarItems = [
-  { label: "Home", active: false },
-  { label: "Projects", active: true },
-  { label: "Recent", active: false },
-  { label: "Favorites", active: false },
-];
-
 export default function Projects() {
+  const { t } = useI18n();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+
+  const sidebarItems = [
+    { label: t('projects.home'), active: false },
+    { label: t('projects.projects'), active: true },
+    { label: t('projects.recent'), active: false },
+    { label: t('projects.favorites'), active: false },
+  ];
 
   return (
     <section id="projects" className="px-3 md:px-6 py-3">
@@ -63,7 +65,7 @@ export default function Projects() {
             <div className="os-dot maximize" />
           </div>
           <div className="os-title">
-            /home/andsoft/projects — Files
+            {t('projects.title')}
           </div>
         </div>
 
@@ -112,7 +114,7 @@ export default function Projects() {
               </div>
             ))}
             <div className="mt-6 px-3">
-              <div className="text-[9px] font-mono text-os-dim tracking-wider uppercase mb-2">Storage</div>
+              <div className="text-[9px] font-mono text-os-dim tracking-wider uppercase mb-2">{t('projects.storage')}</div>
               <div className="os-progress">
                 <div className="os-progress-fill bg-os-cyan" style={{ width: '64%' }} />
               </div>
@@ -124,9 +126,9 @@ export default function Projects() {
           <div className="flex-1 p-4 md:p-6">
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {projects.map((project, i) => (
+                {projectKeys.map((project, i) => (
                   <motion.div
-                    key={project.name}
+                    key={project.nameKey}
                     initial={{ opacity: 0, y: 15 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -140,7 +142,7 @@ export default function Projects() {
                     <div className="aspect-video rounded-md bg-os-bg overflow-hidden mb-3 border border-os-border/30">
                       <img
                         src={project.image}
-                        alt={project.name}
+                        alt={t(project.nameKey)}
                         className="w-full h-full object-cover opacity-70 hover:opacity-100 transition-opacity duration-300"
                       />
                     </div>
@@ -149,12 +151,12 @@ export default function Projects() {
                     <div className="flex items-start gap-2">
                       <Folder size={16} className="text-os-cyan mt-0.5 flex-shrink-0" />
                       <div className="min-w-0">
-                        <h3 className="text-sm font-medium text-os-text truncate">{project.name}</h3>
-                        <p className="text-[11px] text-os-muted mt-0.5 line-clamp-2">{project.description}</p>
+                        <h3 className="text-sm font-medium text-os-text truncate">{t(project.nameKey)}</h3>
+                        <p className="text-[11px] text-os-muted mt-0.5 line-clamp-2">{t(project.descKey)}</p>
                         <div className="flex flex-wrap gap-1.5 mt-2">
-                          {project.tech.map(t => (
-                            <span key={t} className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-os-border/30 text-os-dim">
-                              {t}
+                          {project.tech.map(te => (
+                            <span key={te} className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-os-border/30 text-os-dim">
+                              {te}
                             </span>
                           ))}
                         </div>
@@ -162,7 +164,7 @@ export default function Projects() {
                           <span className="font-mono text-[9px] text-os-dim">{project.size}</span>
                           <span className="font-mono text-[9px] text-os-dim">{project.modified}</span>
                           <a href="#" className="font-mono text-[9px] text-os-cyan hover:text-os-green transition-colors flex items-center gap-1">
-                            Open <ExternalLink size={8} />
+                            {t('projects.open')} <ExternalLink size={8} />
                           </a>
                         </div>
                       </div>
@@ -174,14 +176,14 @@ export default function Projects() {
               <div className="space-y-0.5">
                 {/* List header */}
                 <div className="grid grid-cols-[1fr_80px_100px_80px] gap-2 px-3 py-1.5 text-[10px] font-mono text-os-dim tracking-wider uppercase border-b border-os-border/30">
-                  <div>Name</div>
-                  <div>Type</div>
-                  <div>Modified</div>
-                  <div>Size</div>
+                  <div>{t('projects.name')}</div>
+                  <div>{t('projects.type')}</div>
+                  <div>{t('projects.modified')}</div>
+                  <div>{t('projects.size')}</div>
                 </div>
-                {projects.map((project, i) => (
+                {projectKeys.map((project, i) => (
                   <motion.div
-                    key={project.name}
+                    key={project.nameKey}
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
@@ -190,12 +192,12 @@ export default function Projects() {
                     className={`grid grid-cols-[1fr_80px_100px_80px] gap-2 items-center px-3 py-2.5 rounded cursor-pointer transition-colors text-[11px] font-mono ${
                       selectedIdx === i
                         ? 'bg-os-green/[0.06] text-os-text'
-                        : 'text-os-muted hover:bg-white/[0.02]'
+                        : 'text-os-muted hover:bg-os-border/20'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
                       <Folder size={14} className="text-os-cyan flex-shrink-0" />
-                      <span className="truncate">{project.name}</span>
+                      <span className="truncate">{t(project.nameKey)}</span>
                     </div>
                     <div>{project.type}</div>
                     <div className="text-os-dim">{project.modified}</div>
@@ -209,8 +211,8 @@ export default function Projects() {
 
         {/* Status bar */}
         <div className="px-4 md:px-6 py-2 border-t border-os-border bg-os-titlebar/30 flex items-center justify-between font-mono text-[10px] text-os-dim">
-          <span>{projects.length} items · {selectedIdx !== null ? '1 selected' : 'None selected'}</span>
-          <span>Free: 72 GB</span>
+          <span>{projectKeys.length} {t('projects.items')} · {selectedIdx !== null ? t('projects.selected') : t('projects.noneSelected')}</span>
+          <span>{t('projects.free')}: 72 GB</span>
         </div>
       </div>
     </section>

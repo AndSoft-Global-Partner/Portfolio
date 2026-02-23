@@ -1,8 +1,10 @@
 import { Facebook, Twitter, Linkedin, Github, Mail, MapPin, Phone, Terminal, Activity, Shield, Zap, Server } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import Clock from './Clock';
+import { useI18n } from '../i18n';
 
 export default function Footer() {
+  const { t } = useI18n();
   const [cpu, setCpu] = useState(12);
   const [ram, setRam] = useState(38);
   const [uptime, setUptime] = useState(0);
@@ -872,10 +874,10 @@ Network Status: CONNECTED
   };
 
   const statusItems = [
-    { label: "NETWORK", value: "ONLINE", icon: <Activity size={14} /> },
+    { label: t('footer.network'), value: t('footer.online'), icon: <Activity size={14} /> },
     { label: "CPU", value: `${cpu}%`, icon: <Zap size={14} /> },
     { label: "RAM", value: `${ram}%`, icon: <Server size={14} /> },
-    { label: "UPTIME", value: `${uptime}s`, icon: <Shield size={14} /> },
+    { label: t('tech.uptime'), value: `${uptime}s`, icon: <Shield size={14} /> },
   ];
 
   return (
@@ -948,7 +950,7 @@ Network Status: CONNECTED
               <div className="os-dot maximize" />
             </div>
             <div className="os-title">
-              /sys/footer — System Info
+              {t('footer.title')}
             </div>
           </div>
 
@@ -962,7 +964,7 @@ Network Status: CONNECTED
                   <span className="text-os-dim text-[10px] font-mono tracking-wider ml-2">v2.5 LTS</span>
                 </div>
                 <p className="text-os-muted text-xs leading-relaxed max-w-sm mb-4">
-                  Building the future of digital infrastructure. Secure, scalable, and intelligent solutions for the modern world.
+                  {t('footer.description')}
                 </p>
                 {/* Social icons */}
                 <div className="flex items-center gap-2">
@@ -986,7 +988,7 @@ Network Status: CONNECTED
               {/* Contact */}
               <div className="md:col-span-3">
                 <div className="font-mono text-[10px] text-os-dim tracking-wider uppercase mb-3 flex items-center gap-2">
-                  <span className="text-os-green">●</span> CONTACT
+                  <span className="text-os-green">●</span> {t('footer.contact')}
                 </div>
                 <ul className="space-y-2.5">
                   <li className="flex items-center gap-2.5 text-os-muted text-xs group cursor-default hover:text-os-text transition-colors">
@@ -1013,7 +1015,7 @@ Network Status: CONNECTED
               {/* System Status */}
               <div className="md:col-span-4" onClick={handleAccess}>
                 <div className="font-mono text-[10px] text-os-dim tracking-wider uppercase mb-3 flex items-center gap-2">
-                  <span className="text-os-green">●</span> SYSTEM STATUS
+                  <span className="text-os-green">●</span> {t('footer.systemStatus')}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {statusItems.map((item, i) => (
@@ -1031,7 +1033,7 @@ Network Status: CONNECTED
                 </div>
                 {access && (
                   <div className="text-os-green text-[10px] font-mono mt-2 animate-pulse text-center tracking-wider">
-                    ● ACCESS GRANTED
+                    ● {t('footer.accessGranted')}
                   </div>
                 )}
               </div>
@@ -1057,7 +1059,7 @@ Network Status: CONNECTED
               }}
               className="font-mono text-[10px] text-os-dim hover:text-os-green transition-colors"
             >
-              {showTerminal ? "▼ Hide" : "▶ Show"}
+              {showTerminal ? t('footer.closeTerminal') : t('footer.openTerminal')}
             </button>
           </div>
 
@@ -1196,16 +1198,16 @@ Network Status: CONNECTED
               </span>
               <span className="text-os-dim/30 text-[11px]">·</span>
               <a href="#" className="text-os-dim hover:text-os-green text-[11px] font-mono transition-colors">
-                Privacy
+                {t('footer.privacy')}
               </a>
               <span className="text-os-dim/30 text-[11px]">·</span>
               <a href="#" className="text-os-dim hover:text-os-green text-[11px] font-mono transition-colors">
-                Terms
+                {t('footer.terms')}
               </a>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-os-dim text-[10px] font-mono">Visitors: {visitors.toLocaleString()}</span>
+              <span className="text-os-dim text-[10px] font-mono">{t('footer.visitors')}: {visitors.toLocaleString()}</span>
               <span className="text-os-dim/30">|</span>
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-os-green status-pulse" />

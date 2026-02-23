@@ -1,8 +1,11 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Globe, Wifi, Battery, Volume2, Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Globe, Wifi, Battery, Volume2, Menu, X, Sun, Moon } from 'lucide-react';
+import { useI18n } from '../i18n';
+import { useTheme } from '../theme';
 
 export default function Header() {
-  const [language, setLanguage] = useState('EN');
+  const { lang, toggleLang, t } = useI18n();
+  const { isDark, toggleTheme } = useTheme();
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -18,15 +21,11 @@ export default function Header() {
     return () => clearInterval(interval);
   }, []);
 
-  const toggleLanguage = useCallback(() => {
-    setLanguage(prev => (prev === 'EN' ? 'MN' : 'EN'));
-  }, []);
-
   const navItems = [
-    { label: 'Home', href: '#home' },
-    { label: 'Technologies', href: '#technologies' },
-    { label: 'Projects', href: '#projects' },
-    { label: 'Contact', href: '#contact' },
+    { label: t('nav.home'), href: '#home' },
+    { label: t('nav.technologies'), href: '#technologies' },
+    { label: t('nav.projects'), href: '#projects' },
+    { label: t('nav.contact'), href: '#contact' },
   ];
 
   return (
@@ -45,9 +44,9 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-0.5 ml-2">
             {navItems.map(item => (
               <a
-                key={item.label}
+                key={item.href}
                 href={item.href}
-                className="text-os-muted hover:text-os-text hover:bg-white/[0.04] px-2.5 py-0.5 rounded text-[11px] transition-colors"
+                className="text-os-muted hover:text-os-text hover:bg-os-border/30 px-2.5 py-0.5 rounded text-[11px] transition-colors"
               >
                 {item.label}
               </a>
@@ -62,12 +61,21 @@ export default function Header() {
 
         {/* Right: System tray */}
         <div className="flex items-center gap-2.5 flex-1 justify-end">
+          {/* Theme toggle */}
           <button
-            onClick={toggleLanguage}
+            onClick={toggleTheme}
+            className="text-os-muted hover:text-os-text text-[10px] font-mono transition-colors flex items-center gap-1"
+            title={isDark ? 'Light mode' : 'Dark mode'}
+          >
+            {isDark ? <Sun size={12} /> : <Moon size={12} />}
+          </button>
+          {/* Language toggle */}
+          <button
+            onClick={toggleLang}
             className="text-os-muted hover:text-os-text text-[10px] font-mono transition-colors flex items-center gap-1"
           >
             <Globe size={11} />
-            {language}
+            {lang}
           </button>
           <Wifi size={12} className="text-os-muted hidden sm:block" />
           <Volume2 size={12} className="text-os-muted hidden sm:block" />
@@ -92,15 +100,24 @@ export default function Header() {
         <div className="md:hidden border-t border-os-border bg-os-panel/95 backdrop-blur-md px-4 py-2 space-y-1">
           {navItems.map(item => (
             <a
-              key={item.label}
+              key={item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className="block text-os-muted hover:text-os-green text-[12px] font-mono py-1.5 px-2 rounded hover:bg-white/[0.03] transition-colors"
+              className="block text-os-muted hover:text-os-green text-[12px] font-mono py-1.5 px-2 rounded hover:bg-os-border/20 transition-colors"
             >
               {item.label}
             </a>
           ))}
-          <div className="pt-1 border-t border-os-border/50 mt-1 text-[10px] font-mono text-os-dim">
+          <div className="flex items-center gap-3 pt-1 border-t border-os-border/50 mt-1">
+            <button onClick={toggleTheme} className="text-os-muted hover:text-os-text text-[11px] font-mono flex items-center gap-1">
+              {isDark ? <Sun size={12} /> : <Moon size={12} />}
+              {isDark ? 'Light' : 'Dark'}
+            </button>
+            <button onClick={toggleLang} className="text-os-muted hover:text-os-text text-[11px] font-mono flex items-center gap-1">
+              <Globe size={11} /> {lang}
+            </button>
+          </div>
+          <div className="text-[10px] font-mono text-os-dim">
             {date} {time}
           </div>
         </div>

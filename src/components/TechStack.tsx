@@ -1,5 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useState, useRef } from "react";
+import { useI18n } from "../i18n";
 
 const processes = [
   { pid: 1001, name: "react", display: "React", cpu: 89, mem: 72, color: "#61DAFB", src: "/react.png" },
@@ -14,6 +15,7 @@ const processes = [
 ];
 
 export default function TechStack() {
+  const { t } = useI18n();
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
@@ -29,28 +31,28 @@ export default function TechStack() {
             <div className="os-dot maximize" />
           </div>
           <div className="os-title">
-            System Monitor — Active Processes
+            {t('tech.title')}
           </div>
         </div>
 
         {/* Info bar */}
         <div className="px-4 md:px-6 py-2.5 border-b border-os-border flex items-center justify-between bg-os-titlebar/50">
           <div className="font-mono text-[10px] text-os-muted tracking-wider">
-            <span className="text-os-green">●</span>&nbsp; {processes.length} ACTIVE PROCESSES
+            <span className="text-os-green">●</span>&nbsp; {processes.length} {t('tech.activeProcesses')}
           </div>
           <div className="font-mono text-[10px] text-os-muted tracking-wider hidden sm:block">
-            LOAD: 0.82 · TASKS: {processes.length}/128 · UPTIME: 99.9%
+            {t('tech.load')}: 0.82 · {t('tech.tasks')}: {processes.length}/128 · {t('tech.uptime')}: 99.9%
           </div>
         </div>
 
         {/* Table Headers - Desktop */}
         <div className="hidden md:grid grid-cols-[50px_50px_1fr_140px_140px_80px] gap-2 px-6 py-2 border-b border-os-border/50 text-[10px] font-mono text-os-dim tracking-wider uppercase">
           <div></div>
-          <div>PID</div>
-          <div>PROCESS</div>
-          <div>CPU</div>
-          <div>MEMORY</div>
-          <div>STATUS</div>
+          <div>{t('tech.pid')}</div>
+          <div>{t('tech.process')}</div>
+          <div>{t('tech.cpu')}</div>
+          <div>{t('tech.memory')}</div>
+          <div>{t('tech.status')}</div>
         </div>
 
         {/* Process rows */}
@@ -141,7 +143,7 @@ export default function TechStack() {
                   className="w-1.5 h-1.5 rounded-full status-pulse"
                   style={{ background: proc.color }}
                 />
-                <span className="font-mono text-[10px] text-os-green">ACTIVE</span>
+                <span className="font-mono text-[10px] text-os-green">{t('tech.active')}</span>
               </div>
             </motion.div>
           ))}
@@ -150,10 +152,10 @@ export default function TechStack() {
         {/* Footer */}
         <div className="px-4 md:px-6 py-2.5 border-t border-os-border bg-os-titlebar/30 flex items-center justify-between">
           <div className="font-mono text-[10px] text-os-dim">
-            Total: {processes.length} processes · All systems operational
+            Total: {processes.length} {t('tech.totalProcesses')}
           </div>
           <div className="font-mono text-[10px] text-os-green">
-            ● HEALTHY
+            ● {t('tech.healthy')}
           </div>
         </div>
       </div>
