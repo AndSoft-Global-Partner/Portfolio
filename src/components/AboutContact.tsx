@@ -2,9 +2,11 @@ import { Phone, Mail, MapPin, Send, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useI18n } from '../useI18n';
+import { useTheme } from '../useTheme';
 
 export default function AboutContact() {
   const { t } = useI18n();
+  const { isDark } = useTheme();
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
   const contactInfo = [
@@ -58,9 +60,9 @@ export default function AboutContact() {
                   href={item.href}
                   target={item.type === 'location' ? '_blank' : undefined}
                   rel={item.type === 'location' ? 'noopener noreferrer' : undefined}
-                  className="flex items-center gap-3 p-2.5 rounded-md hover:bg-os-border/20 transition-colors group"
+                  className="flex items-center gap-3 p-2.5 rounded-md hover:bg-os-titlebar transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded flex items-center justify-center bg-os-border/30 group-hover:bg-os-green/10 transition-colors">
+                  <div className="w-8 h-8 rounded flex items-center justify-center bg-os-titlebar group-hover:bg-emerald-500/10 transition-colors">
                     <item.icon size={14} className="text-os-muted group-hover:text-os-green transition-colors" />
                   </div>
                   <div>
@@ -90,7 +92,7 @@ export default function AboutContact() {
                 {t('contact.map')}
               </div>
             </div>
-            <div className="relative h-[180px] group">
+            <div className="relative h-[180px] group bg-os-bg rounded-b-[10px] overflow-hidden">
               <a
                 href="https://maps.app.goo.gl/AnQqmdH7yEd2PeqDA"
                 target="_blank"
@@ -105,7 +107,9 @@ export default function AboutContact() {
                 height="100%"
                 style={{
                   border: 0,
-                  filter: 'grayscale(100%) invert(85%) contrast(90%) hue-rotate(180deg)',
+                  filter: isDark
+                    ? 'grayscale(100%) invert(85%) contrast(90%) hue-rotate(180deg)'
+                    : 'grayscale(20%) saturate(0.8)',
                 }}
                 allowFullScreen
                 loading="lazy"
@@ -140,7 +144,7 @@ export default function AboutContact() {
 
             <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 flex-1 flex flex-col">
               {/* To field */}
-              <div className="flex items-center gap-2 pb-3 border-b border-os-border/50">
+              <div className="flex items-center gap-2 pb-3 border-b border-os-border">
                 <span className="font-mono text-[11px] text-os-dim w-12">{t('contact.to')}</span>
                 <span className="font-mono text-[11px] text-os-cyan">contact@andsoft.com</span>
               </div>
@@ -153,8 +157,8 @@ export default function AboutContact() {
                     type="text"
                     required
                     placeholder={t('contact.yourName')}
-                    className="w-full bg-os-bg/50 border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim/40
-                      focus:outline-none focus:border-os-green/40 focus:ring-1 focus:ring-os-green/10 transition-colors"
+                    className="w-full bg-os-panel border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim
+                      focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/10 transition-colors"
                   />
                 </div>
                 <div>
@@ -163,8 +167,8 @@ export default function AboutContact() {
                     type="email"
                     required
                     placeholder={t('contact.yourEmail')}
-                    className="w-full bg-os-bg/50 border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim/40
-                      focus:outline-none focus:border-os-cyan/40 focus:ring-1 focus:ring-os-cyan/10 transition-colors"
+                    className="w-full bg-os-panel border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim
+                      focus:outline-none focus:border-sky-500/40 focus:ring-1 focus:ring-sky-500/10 transition-colors"
                   />
                 </div>
               </div>
@@ -176,8 +180,8 @@ export default function AboutContact() {
                   type="text"
                   required
                   placeholder={t('contact.projectInquiry')}
-                  className="w-full bg-os-bg/50 border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim/40
-                    focus:outline-none focus:border-os-magenta/40 focus:ring-1 focus:ring-os-magenta/10 transition-colors"
+                  className="w-full bg-os-panel border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim
+                    focus:outline-none focus:border-fuchsia-500/40 focus:ring-1 focus:ring-fuchsia-500/10 transition-colors"
                 />
               </div>
 
@@ -188,13 +192,13 @@ export default function AboutContact() {
                   required
                   rows={6}
                   placeholder={t('contact.tellUs')}
-                  className="w-full h-full min-h-[120px] bg-os-bg/50 border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim/40 resize-none
-                    focus:outline-none focus:border-os-green/40 focus:ring-1 focus:ring-os-green/10 transition-colors"
+                  className="w-full h-full min-h-[120px] bg-os-panel border border-os-border rounded px-3 py-2 text-xs text-os-text font-mono placeholder:text-os-dim resize-none
+                    focus:outline-none focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/10 transition-colors"
                 />
               </div>
 
               {/* Send bar */}
-              <div className="flex items-center justify-between pt-2 border-t border-os-border/50">
+              <div className="flex items-center justify-between pt-2 border-t border-os-border">
                 <div className="font-mono text-[10px]">
                   {formStatus === 'sent' && <span className="text-os-green">{t('contact.sent')}</span>}
                   {formStatus === 'sending' && <span className="text-os-cyan">{t('contact.sending')}</span>}
@@ -203,8 +207,8 @@ export default function AboutContact() {
                 <button
                   type="submit"
                   disabled={formStatus === 'sending'}
-                  className="flex items-center gap-2 px-4 py-2 rounded bg-os-green/10 border border-os-green/20
-                    hover:bg-os-green/20 hover:border-os-green/30 transition-colors
+                  className="flex items-center gap-2 px-4 py-2 rounded bg-emerald-500/10 border border-emerald-500/20
+                    hover:bg-emerald-500/20 hover:border-emerald-500/30 transition-colors
                     disabled:opacity-40 font-mono text-[11px] text-os-green"
                 >
                   <Send size={12} />

@@ -3,11 +3,8 @@ import { useEffect, useState } from "react";
 import { useI18n } from "../useI18n";
 
 const partners = [
-  { name: 'IBM', logo: '/1.png' },
-  { name: 'Microsoft', logo: '/2.png' },
-  { name: 'Oracle', logo: '/3.png' },
-  { name: 'Google', logo: '/4.png' },
-  { name: 'Amazon', logo: '/5.png' },
+  'IBM', 'Microsoft', 'Oracle', 'Google', 'Amazon',
+  'SAP', 'Cisco', 'Dell', 'HP', 'Intel',
 ];
 
 const infoLineKeys = [
@@ -158,11 +155,20 @@ export default function HeroSection() {
               {t('hero.trustedNodes')}
             </div>
           </div>
-          <div className="p-4">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 place-items-center">
-              {partners.map((partner, i) => (
-                <div key={i} className="flex items-center justify-center h-12 opacity-40 hover:opacity-90 transition-opacity duration-300 grayscale hover:grayscale-0">
-                  <img src={partner.logo} alt={partner.name} className="max-h-8 object-contain" />
+          <div className="py-3 overflow-hidden relative group/marquee">
+            <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none bg-gradient-to-r from-os-window to-transparent" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none bg-gradient-to-l from-os-window to-transparent" />
+
+            <div className="marquee-track group-hover/marquee:[animation-play-state:paused]">
+              {[...partners, ...partners].map((name, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 mx-3 px-6 py-2 rounded border border-os-border bg-os-panel flex items-center gap-2.5 select-none"
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-os-green opacity-60" />
+                  <span className="font-mono text-[11px] font-semibold text-os-muted tracking-widest uppercase whitespace-nowrap">
+                    {name}
+                  </span>
                 </div>
               ))}
             </div>
