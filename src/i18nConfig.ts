@@ -89,6 +89,14 @@ export const translations = {
   'contact.allRequired': { EN: 'All fields required', MN: 'Бүх талбарыг бөглөнө үү' },
   'contact.send': { EN: 'Send', MN: 'Илгээх' },
 
+  // Command Palette
+  'palette.placeholder': { EN: 'Type a command…', MN: 'Команд бичнэ үү…' },
+  'palette.navigate': { EN: 'Navigate', MN: 'Шилжих' },
+  'palette.actions': { EN: 'Actions', MN: 'Үйлдлүүд' },
+  'palette.toggleTheme': { EN: 'Toggle Theme', MN: 'Тема солих' },
+  'palette.toggleLang': { EN: 'Toggle Language', MN: 'Хэл солих' },
+  'palette.hint': { EN: 'Ctrl+K to open command palette', MN: 'Ctrl+K командын самбар нээх' },
+
   // Footer
   'footer.title': { EN: '/sys/footer — System Info', MN: '/sys/хөл — Системийн мэдээлэл' },
   'footer.description': { EN: 'Building the future of digital infrastructure. Secure, scalable, and intelligent solutions for the modern world.', MN: 'Дижитал дэд бүтцийн ирээдүйг бүтээж байна. Аюулгүй, өргөтгөх боломжтой, ухаалаг шийдлүүд.' },
