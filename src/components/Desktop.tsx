@@ -20,17 +20,18 @@ const processes = [
 ];
 
 function MonitorApp() {
+  const { t } = useI18n();
   return (
     <div className="bg-os-bg h-full flex flex-col">
       {/* Info bar */}
       <div className="px-4 py-2 border-b border-os-border flex items-center justify-between bg-os-titlebar/50 text-[10px] font-mono text-os-muted">
-        <span><span className="text-os-green">●</span> {processes.length} ACTIVE PROCESSES</span>
-        <span>LOAD: 0.82 · UPTIME: 99.9%</span>
+        <span><span className="text-os-green">●</span> {processes.length} {t('win.activeProcesses')}</span>
+        <span>{t('win.load')}: 0.82 · {t('win.uptime')}: 99.9%</span>
       </div>
 
       {/* Table header */}
       <div className="grid grid-cols-[50px_1fr_70px_70px_80px] gap-2 px-4 py-1.5 border-b border-os-border/50 text-[9px] font-mono text-os-dim tracking-wider uppercase">
-        <div>PID</div><div>PROCESS</div><div>CPU</div><div>MEM</div><div>STATUS</div>
+        <div>{t('win.pid')}</div><div>{t('win.process')}</div><div>{t('win.cpu')}</div><div>{t('win.mem')}</div><div>{t('win.status')}</div>
       </div>
 
       {/* Rows */}
@@ -51,7 +52,7 @@ function MonitorApp() {
                 <div className="os-progress-fill" style={{ width: `${p.mem}%`, background: p.color }} />
               </div>
             </div>
-            <div className="text-os-green text-[9px]">● ACTIVE</div>
+            <div className="text-os-green text-[9px]">● {t('win.active')}</div>
           </div>
         ))}
       </div>
@@ -68,6 +69,7 @@ const projectFiles = [
 ];
 
 function FilesApp() {
+  const { t } = useI18n();
   return (
     <div className="bg-os-bg h-full flex flex-col">
       {/* Path bar */}
@@ -107,8 +109,8 @@ function FilesApp() {
 
       {/* Status bar */}
       <div className="px-4 py-1.5 border-t border-os-border text-[10px] font-mono text-os-dim flex justify-between">
-        <span>{projectFiles.length} items</span>
-        <span>72 GB free</span>
+        <span>{projectFiles.length} {t('win.items')}</span>
+        <span>72 GB {t('win.free')}</span>
       </div>
     </div>
   );

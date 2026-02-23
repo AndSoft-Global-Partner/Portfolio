@@ -102,6 +102,26 @@ export const translations = {
   'palette.openFiles': { EN: 'Open File Manager', MN: 'Файл менежер нээх' },
   'palette.openMail': { EN: 'Open Mail', MN: 'Имэйл нээх' },
 
+  // Window titles
+  'win.terminal': { EN: 'Terminal — guest@andsoft-os', MN: 'Терминал — зочин@andsoft-os' },
+  'win.monitor': { EN: 'System Monitor — Processes', MN: 'Системийн Хяналт — Процессууд' },
+  'win.files': { EN: 'File Manager — Projects', MN: 'Файл Менежер — Төслүүд' },
+  'win.mail': { EN: 'Mail — New Message', MN: 'Имэйл — Шинэ зурвас' },
+  'win.terminalEmulator': { EN: 'Terminal Emulator', MN: 'Терминал Эмулятор' },
+
+  // Window content
+  'win.activeProcesses': { EN: 'ACTIVE PROCESSES', MN: 'ИДЭВХТЭЙ ПРОЦЕССУУД' },
+  'win.load': { EN: 'LOAD', MN: 'АЧААЛАЛ' },
+  'win.uptime': { EN: 'UPTIME', MN: 'АЖИЛЛАГААНЫ ХУГАЦАА' },
+  'win.pid': { EN: 'PID', MN: 'PID' },
+  'win.process': { EN: 'PROCESS', MN: 'ПРОЦЕСС' },
+  'win.cpu': { EN: 'CPU', MN: 'CPU' },
+  'win.mem': { EN: 'MEM', MN: 'САНАХ ОЙ' },
+  'win.status': { EN: 'STATUS', MN: 'ТӨЛӨВ' },
+  'win.active': { EN: 'ACTIVE', MN: 'ИДЭВХТЭЙ' },
+  'win.items': { EN: 'items', MN: 'зүйл' },
+  'win.free': { EN: 'free', MN: 'чөлөөтэй' },
+
   // Footer
   'footer.title': { EN: '/sys/footer — System Info', MN: '/sys/хөл — Системийн мэдээлэл' },
   'footer.description': { EN: 'Building the future of digital infrastructure. Secure, scalable, and intelligent solutions for the modern world.', MN: 'Дижитал дэд бүтцийн ирээдүйг бүтээж байна. Аюулгүй, өргөтгөх боломжтой, ухаалаг шийдлүүд.' },

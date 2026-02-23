@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { motion, useDragControls, useMotionValue } from 'framer-motion';
 import { useWindowManager, type AppWindow } from '../windowManager';
+import { useI18n } from '../useI18n';
+import type { TranslationKey } from '../i18nConfig';
 import type { ReactNode } from 'react';
 
 interface Props {
@@ -13,6 +15,7 @@ export default function OSWindow({ win, children }: Props) {
     focusWindow, closeWindow, minimizeWindow,
     toggleMaximize, updatePosition, activeId,
   } = useWindowManager();
+  const { t } = useI18n();
 
   const dragControls = useDragControls();
   const isActive = activeId === win.id;
@@ -85,7 +88,7 @@ export default function OSWindow({ win, children }: Props) {
             onClick={e => { e.stopPropagation(); toggleMaximize(win.id); }}
           />
         </div>
-        <span className="os-title truncate">{win.title}</span>
+        <span className="os-title truncate">{t(win.titleKey as TranslationKey)}</span>
         {/* Invisible spacer to center the title */}
         <div className="os-dots invisible" aria-hidden>
           <span className="os-dot" /><span className="os-dot" /><span className="os-dot" />

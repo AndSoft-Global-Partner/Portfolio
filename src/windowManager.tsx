@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 /* ═══ Types ═══ */
 export interface AppWindow {
   id: string;
-  title: string;
+  titleKey: string;   // i18n translation key
   icon: string;       // lucide icon name or emoji
   x: number;
   y: number;
@@ -36,7 +36,7 @@ const WindowManagerContext = createContext<WindowManagerContextType | null>(null
 const APP_DEFAULTS: Record<AppId, Omit<AppWindow, 'z' | 'minimized' | 'maximized'>> = {
   home: {
     id: 'home',
-    title: 'Terminal — guest@andsoft-os',
+    titleKey: 'win.terminal',
     icon: '🖥',
     x: 60, y: 40,
     width: 820, height: 520,
@@ -44,7 +44,7 @@ const APP_DEFAULTS: Record<AppId, Omit<AppWindow, 'z' | 'minimized' | 'maximized
   },
   technologies: {
     id: 'technologies',
-    title: 'System Monitor — Processes',
+    titleKey: 'win.monitor',
     icon: '⚡',
     x: 120, y: 70,
     width: 780, height: 500,
@@ -52,7 +52,7 @@ const APP_DEFAULTS: Record<AppId, Omit<AppWindow, 'z' | 'minimized' | 'maximized
   },
   projects: {
     id: 'projects',
-    title: 'File Manager — Projects',
+    titleKey: 'win.files',
     icon: '📁',
     x: 180, y: 50,
     width: 800, height: 540,
@@ -60,7 +60,7 @@ const APP_DEFAULTS: Record<AppId, Omit<AppWindow, 'z' | 'minimized' | 'maximized
   },
   contact: {
     id: 'contact',
-    title: 'Mail — New Message',
+    titleKey: 'win.mail',
     icon: '✉️',
     x: 100, y: 60,
     width: 820, height: 500,
@@ -68,7 +68,7 @@ const APP_DEFAULTS: Record<AppId, Omit<AppWindow, 'z' | 'minimized' | 'maximized
   },
   terminal: {
     id: 'terminal',
-    title: 'Terminal Emulator',
+    titleKey: 'win.terminalEmulator',
     icon: '💻',
     x: 140, y: 80,
     width: 700, height: 450,
