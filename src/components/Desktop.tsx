@@ -226,16 +226,10 @@ const APP_CONTENT: Record<AppId, () => JSX.Element> = {
 export default function Desktop() {
   const { windows, activeId } = useWindowManager();
 
-  const handleDesktopClick = () => {
-    // Click on empty desktop area — deselect active window
-    // (handled by the gap between windows)
-  };
-
   return (
     <div
       className="fixed inset-0 pointer-events-none hidden md:block"
       style={{ zIndex: 40 }}
-      onClick={handleDesktopClick}
     >
       <AnimatePresence>
         {windows

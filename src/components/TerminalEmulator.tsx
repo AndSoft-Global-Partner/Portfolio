@@ -27,7 +27,6 @@ export default function TerminalEmulator({ className = '', showBoot = false }: P
   const [nanoFile, setNanoFile] = useState('');
   const [nanoContent, setNanoContent] = useState('');
   const [activeNode, setActiveNode] = useState('ANDSOFT-CORE');
-  const [, setAiOnline] = useState(false);
   const [systemCrashed, setSystemCrashed] = useState(false);
   const [history, setHistory] = useState<Array<{ text: string; type: 'input' | 'output' | 'error' | 'system' }>>([
     { text: 'System initialized.', type: 'system' },
@@ -290,7 +289,7 @@ crash      crash system [ROOT]`,
 
     ps: () => `PID   NAME\n102   andsoft-core\n211   network-daemon\n334   security-module\n445   ai-monitor\n556   firewall-service`,
 
-    ai: async () => { await typeText('AI CORE INITIALIZING...'); setAiOnline(true); await typeText('AI CORE ONLINE'); await typeText('Monitoring system.'); await typeText('Ready for commands.'); return ''; },
+    ai: async () => { await typeText('AI CORE INITIALIZING...'); await typeText('AI CORE ONLINE'); await typeText('Monitoring system.'); await typeText('Ready for commands.'); return ''; },
 
     connect: async (args: string[]) => {
       const node = args[0] || 'node1';

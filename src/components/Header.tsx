@@ -204,27 +204,31 @@ export default function Header() {
       <header
         className={`sticky top-0 z-50 select-none transition-all duration-300 ${
           scrolled
-            ? 'bg-os-panel/95 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-os-border'
+            ? 'bg-os-panel/95 backdrop-blur-xl shadow-[0_1px_12px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_12px_rgba(0,0,0,0.4)] border-b border-os-border'
             : 'bg-os-panel/80 backdrop-blur-md border-b border-os-border/50'
         }`}
       >
-        <div className="h-8 flex items-center px-3 md:px-4">
+        <div className="h-9 flex items-center px-3 md:px-5">
 
           {/* ── Left: logo + nav ── */}
           <div className="flex items-center gap-3 flex-1">
-            <a href="#home" className="flex items-center gap-2">
-              <div className="w-3.5 h-3.5 rounded-sm bg-os-green/80" />
-              <span className="font-mono text-[11px] font-semibold text-os-green tracking-wide">
+            <a href="#home" className="flex items-center gap-2 group">
+              <img
+                src="/andsoft.png"
+                alt="AndSoft"
+                className="w-5 h-5 rounded-[4px] object-contain transition-transform duration-200 group-hover:scale-110"
+              />
+              <span className="font-mono text-[11px] font-semibold tracking-wide text-os-text/90 group-hover:text-os-green transition-colors duration-200">
                 AndSoft
               </span>
             </a>
 
-            <nav className="hidden md:flex items-center gap-0.5 ml-2">
+            <nav className="hidden md:flex items-center gap-0.5 ml-3">
               {navItems.map(item => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className={`relative px-2.5 py-0.5 rounded text-[11px] transition-all duration-200 ${
+                  className={`relative px-2.5 py-1 rounded-md text-[11px] font-medium transition-all duration-200 ${
                     active === item.href
                       ? 'text-os-green bg-os-green/[0.08]'
                       : 'text-os-muted hover:text-os-text hover:bg-os-border/30'
@@ -262,29 +266,31 @@ export default function Header() {
           </div>
 
           {/* ── Right: system tray ── */}
-          <div className="flex items-center gap-2.5 flex-1 justify-end">
+          <div className="flex items-center gap-3 flex-1 justify-end">
             <button
               onClick={toggleTheme}
               title={isDark ? 'Light mode' : 'Dark mode'}
-              className="text-os-muted hover:text-os-text transition-colors"
+              className="text-os-muted hover:text-os-text transition-colors duration-200 hover:rotate-12"
             >
-              {isDark ? <Sun size={12} /> : <Moon size={12} />}
+              {isDark ? <Sun size={13} /> : <Moon size={13} />}
             </button>
 
             <button
               onClick={toggleLang}
-              className="text-os-muted hover:text-os-text flex items-center gap-1 text-[10px] font-mono transition-colors"
+              className="text-os-muted hover:text-os-text flex items-center gap-1 text-[10px] font-mono transition-colors duration-200"
             >
-              <Globe size={11} />
-              {lang}
+              <Globe size={12} />
+              <span className="uppercase">{lang}</span>
             </button>
 
-            <Wifi size={12} className="text-os-muted hidden sm:block" />
-            <Volume2 size={12} className="text-os-muted hidden sm:block" />
+            <div className="hidden sm:flex items-center gap-2 text-os-muted">
+              <Wifi size={12} className="hover:text-os-text transition-colors" />
+              <Volume2 size={12} className="hover:text-os-text transition-colors" />
+            </div>
 
             <div className="hidden sm:flex items-center gap-1 text-os-muted">
-              <Battery size={12} className={batteryLevel <= 20 ? 'text-os-red' : ''} />
-              <span className={`text-[10px] font-mono ${batteryLevel <= 20 ? 'text-os-red' : ''}`}>
+              <Battery size={13} className={batteryLevel <= 20 ? 'text-os-red' : ''} />
+              <span className={`text-[10px] font-mono tabular-nums ${batteryLevel <= 20 ? 'text-os-red' : ''}`}>
                 {batteryLevel}%
               </span>
             </div>

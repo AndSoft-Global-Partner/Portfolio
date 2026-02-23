@@ -23,7 +23,6 @@ export default function Footer() {
   const [showBootScreen, setShowBootScreen] = useState(true);
   const [showFloatingTerminal, setShowFloatingTerminal] = useState(false);
   const [activeNode, setActiveNode] = useState("ANDSOFT-CORE");
-  const [, setAiOnline] = useState(false);
   const [systemCrashed, setSystemCrashed] = useState(false);
   const [history, setHistory] = useState<Array<{ text: string; type: "input" | "output" | "error" | "system" }>>([
     { text: "System initialized.", type: "system" },
@@ -449,7 +448,6 @@ Network Status: CONNECTED
 
     ai: async (): Promise<string> => {
       await typeText("AI CORE INITIALIZING...");
-      setAiOnline(true);
       await typeText("AI CORE ONLINE");
       await typeText("Monitoring system.");
       await typeText("Ready for commands.");

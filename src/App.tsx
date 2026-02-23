@@ -7,6 +7,7 @@ import AboutContact from './components/AboutContact';
 import Footer from './components/Footer';
 import Desktop from './components/Desktop';
 import Taskbar from './components/Taskbar';
+import ParticleField from './components/ParticleField';
 import { I18nProvider } from './i18n';
 import { ThemeProvider } from './theme';
 import { WindowManagerProvider } from './windowManager';
@@ -21,6 +22,9 @@ function App() {
       <I18nProvider>
         <WindowManagerProvider>
           <div className="min-h-screen desktop-bg relative scanlines">
+            {/* Animated particle background */}
+            <ParticleField />
+
             {/* OS Top Panel */}
             <Header />
 
