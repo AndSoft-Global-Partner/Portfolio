@@ -106,7 +106,7 @@ export default function Projects() {
                 className={`flex items-center gap-2 px-3 py-1.5 rounded text-[11px] font-mono cursor-pointer transition-colors ${
                   item.active
                     ? 'text-os-green bg-os-green/5'
-                    : 'text-os-muted hover:text-os-text hover:bg-white/[0.02]'
+                    : 'text-os-muted hover:text-os-text hover:bg-os-border/20'
                 }`}
               >
                 <Folder size={13} />

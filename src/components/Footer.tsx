@@ -15,7 +15,7 @@ export default function Footer() {
   const [loginUser, setLoginUser] = useState("");
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [bootSequenceShown, setBootSequenceShown] = useState(false);
-  const [_theme, _setTheme] = useState<"cyan" | "green" | "amber" | "red">("cyan");
+  const [termTheme, setTermTheme] = useState<"cyan" | "green" | "amber" | "red">("cyan");
   const [dynamicFiles, setDynamicFiles] = useState<Record<string, { type: "file" | "dir", content?: string, path: string }>>({});
   const [nanoMode, setNanoMode] = useState(false);
   const [nanoFile, setNanoFile] = useState("");
@@ -23,8 +23,8 @@ export default function Footer() {
   const [showBootScreen, setShowBootScreen] = useState(true);
   const [showFloatingTerminal, setShowFloatingTerminal] = useState(false);
   const [activeNode, setActiveNode] = useState("ANDSOFT-CORE");
-  const [_aiOnline, _setAiOnline] = useState(false);
-  const [_systemCrashed, _setSystemCrashed] = useState(false);
+  const [, setAiOnline] = useState(false);
+  const [systemCrashed, setSystemCrashed] = useState(false);
   const [history, setHistory] = useState<Array<{ text: string; type: "input" | "output" | "error" | "system" }>>([
     { text: "System initialized.", type: "system" },
     { text: "Type 'help' to see available commands.", type: "system" }
@@ -449,7 +449,7 @@ Network Status: CONNECTED
 
     ai: async (): Promise<string> => {
       await typeText("AI CORE INITIALIZING...");
-      _setAiOnline(true);
+      setAiOnline(true);
       await typeText("AI CORE ONLINE");
       await typeText("Monitoring system.");
       await typeText("Ready for commands.");
@@ -470,7 +470,7 @@ Network Status: CONNECTED
       if (!["cyan", "green", "amber", "red"].includes(newTheme)) {
         return "Available themes: cyan, green, amber, red";
       }
-      _setTheme(newTheme);
+      setTermTheme(newTheme);
       await typeText(`Theme changed to ${newTheme}`);
       return "";
     },
@@ -496,7 +496,7 @@ Network Status: CONNECTED
     crash: async (): Promise<string> => {
       if (!await requireRoot()) return "";
       
-      _setSystemCrashed(true);
+      setSystemCrashed(true);
       await typeText("INITIATING SYSTEM SHUTDOWN...");
       await typeText("Terminating all processes...");
       await typeText("");
@@ -505,7 +505,7 @@ Network Status: CONNECTED
       await typeText("REBOOT REQUIRED");
       
       setTimeout(async () => {
-        _setSystemCrashed(false);
+        setSystemCrashed(false);
         setBootSequenceShown(false);
         setShowBootScreen(true);
         await new Promise(r => setTimeout(r, 2000));
@@ -550,7 +550,7 @@ Network Status: CONNECTED
           { text: `${user}@${activeNode}:~$ Password: ••••`, type: "input" }
         ]);
         setUser("root");
-        _setTheme("red");
+        setTermTheme("red");
         setHistory(prev => [
           ...prev,
           { text: "Welcome to AndSoft, root.", type: "system" }
@@ -608,7 +608,8 @@ Network Status: CONNECTED
     ]);
 
     if (commands[base as keyof typeof commands]) {
-      const result = await (commands[base as keyof typeof commands] as any)(args);
+      const handler = commands[base as keyof typeof commands] as (args: string[]) => Promise<string> | string;
+      const result = await handler(args);
 
       if (result === "__CLEAR__") {
         setHistory([]);
@@ -693,7 +694,7 @@ Network Status: CONNECTED
           setHistory(parsed);
         }
       }
-    } catch (e) {
+    } catch {
       // Ignore parse errors
     }
   }, []);
@@ -702,7 +703,7 @@ Network Status: CONNECTED
   useEffect(() => {
     try {
       localStorage.setItem("term_history", JSON.stringify(history));
-    } catch (e) {
+    } catch {
       // Ignore storage errors
     }
   }, [history]);
@@ -712,7 +713,7 @@ Network Status: CONNECTED
     try {
       const saved = localStorage.getItem("term_user");
       if (saved === "root") setUser("root");
-    } catch (e) {
+    } catch {
       // Ignore storage errors
     }
   }, []);
@@ -721,7 +722,7 @@ Network Status: CONNECTED
   useEffect(() => {
     try {
       localStorage.setItem("term_user", user);
-    } catch (e) {
+    } catch {
       // Ignore storage errors
     }
   }, [user]);
@@ -731,7 +732,7 @@ Network Status: CONNECTED
     try {
       const saved = localStorage.getItem("cmd_history");
       if (saved) setCommandHistory(JSON.parse(saved));
-    } catch (e) {
+    } catch {
       // Ignore parse errors
     }
   }, []);
@@ -740,7 +741,7 @@ Network Status: CONNECTED
   useEffect(() => {
     try {
       localStorage.setItem("cmd_history", JSON.stringify(commandHistory));
-    } catch (e) {
+    } catch {
       // Ignore storage errors
     }
   }, [commandHistory]);
@@ -750,7 +751,7 @@ Network Status: CONNECTED
     try {
       const saved = localStorage.getItem("term_files");
       if (saved) setDynamicFiles(JSON.parse(saved));
-    } catch (e) {
+    } catch {
       // Ignore parse errors
     }
   }, []);
@@ -759,7 +760,7 @@ Network Status: CONNECTED
   useEffect(() => {
     try {
       localStorage.setItem("term_files", JSON.stringify(dynamicFiles));
-    } catch (e) {
+    } catch {
       // Ignore storage errors
     }
   }, [dynamicFiles]);
@@ -774,41 +775,20 @@ Network Status: CONNECTED
   // Persist theme to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem("term_theme", _theme);
-    } catch (e) {
+      localStorage.setItem("term_theme", termTheme);
+    } catch {
       // Ignore storage errors
     }
-  }, [_theme]);
+  }, [termTheme]);
 
   // Load theme from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem("term_theme");
       if (saved && ["cyan", "green", "amber", "red"].includes(saved)) {
-        _setTheme(saved as any);
+        setTermTheme(saved as "cyan" | "green" | "amber" | "red");
       }
-    } catch (e) {
-      // Ignore storage errors
-    }
-  }, []);
-
-  // Persist theme to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("term_theme", _theme);
-    } catch (e) {
-      // Ignore storage errors
-    }
-  }, [_theme]);
-
-  // Load theme from localStorage
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("term_theme");
-      if (saved && ["cyan", "green", "amber", "red"].includes(saved)) {
-        _setTheme(saved as any);
-      }
-    } catch (e) {
+    } catch {
       // Ignore storage errors
     }
   }, []);
@@ -832,6 +812,7 @@ Network Status: CONNECTED
       };
       runBootSequence();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showTerminal, bootSequenceShown, showBootScreen]);
 
   const handleAccess = () => {
@@ -843,7 +824,7 @@ Network Status: CONNECTED
   // Sound effects using Web Audio API
   const playSound = (frequency: number, duration: number, type: 'sine' | 'square' | 'triangle' = 'sine') => {
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const ctx = new (window.AudioContext || (window as unknown as Record<string, typeof AudioContext>).webkitAudioContext)();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
@@ -859,7 +840,7 @@ Network Status: CONNECTED
         osc.stop();
         ctx.close();
       }, duration * 1000);
-    } catch (e) {
+    } catch {
       // Audio not supported
     }
   };
@@ -1155,13 +1136,13 @@ Network Status: CONNECTED
                         setShowAutocomplete(e.target.value.length > 0);
                       }}
                       onKeyDown={handleKeyDown}
-                      disabled={isTyping || _systemCrashed}
+                      disabled={isTyping || systemCrashed}
                       rows={1}
                       className="bg-transparent outline-none flex-1 w-full text-os-green caret-current min-w-0 resize-none overflow-hidden whitespace-pre-wrap break-words disabled:opacity-40 leading-relaxed placeholder:text-os-dim/40"
                       placeholder={isTyping ? "" : "type a command..."}
                       autoFocus
                     />
-                    {!isTyping && !_systemCrashed && <span className="animate-pulse text-os-green ml-1">█</span>}
+                    {!isTyping && !systemCrashed && <span className="animate-pulse text-os-green ml-1">█</span>}
                     
                     {/* Autocomplete dropdown */}
                     {showAutocomplete && getAutocompleteOptions().length > 0 && (

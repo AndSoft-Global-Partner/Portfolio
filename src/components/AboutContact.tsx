@@ -8,9 +8,9 @@ export default function AboutContact() {
   const [formStatus, setFormStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
   const contactInfo = [
-    { icon: Phone, label: t('contact.phone'), value: "+976 99119000", href: "tel:+97699119000" },
-    { icon: Mail, label: t('contact.email'), value: "contact@andsoft.com", href: "mailto:contact@andsoft.com" },
-    { icon: MapPin, label: t('contact.location'), value: "Embassy One, 10th Floor", href: "https://maps.app.goo.gl/AnQqmdH7yEd2PeqDA" },
+    { icon: Phone, label: t('contact.phone'), value: "+976 99119000", href: "tel:+97699119000", type: "phone" as const },
+    { icon: Mail, label: t('contact.email'), value: "contact@andsoft.com", href: "mailto:contact@andsoft.com", type: "email" as const },
+    { icon: MapPin, label: t('contact.location'), value: "Embassy One, 10th Floor", href: "https://maps.app.goo.gl/AnQqmdH7yEd2PeqDA", type: "location" as const },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -54,11 +54,11 @@ export default function AboutContact() {
 
               {contactInfo.map((item) => (
                 <a
-                  key={item.label}
+                  key={item.type}
                   href={item.href}
-                  target={item.label === 'Location' ? '_blank' : undefined}
-                  rel={item.label === 'Location' ? 'noopener noreferrer' : undefined}
-                  className="flex items-center gap-3 p-2.5 rounded-md hover:bg-white/[0.02] transition-colors group"
+                  target={item.type === 'location' ? '_blank' : undefined}
+                  rel={item.type === 'location' ? 'noopener noreferrer' : undefined}
+                  className="flex items-center gap-3 p-2.5 rounded-md hover:bg-os-border/20 transition-colors group"
                 >
                   <div className="w-8 h-8 rounded flex items-center justify-center bg-os-border/30 group-hover:bg-os-green/10 transition-colors">
                     <item.icon size={14} className="text-os-muted group-hover:text-os-green transition-colors" />
