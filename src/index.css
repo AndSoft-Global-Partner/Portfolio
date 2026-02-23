@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -46,7 +46,7 @@
 
   /* ═══ DARK MODE (default) ═══ */
   html.dark body {
-    font-family: 'Ubuntu', system-ui, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     background: #000000;
     color: #d0d0e0;
     overflow-x: hidden;
@@ -62,7 +62,7 @@
 
   /* ═══ LIGHT MODE ═══ */
   html.light body {
-    font-family: 'Ubuntu', system-ui, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     background: #f0f1f5;
     color: #1a1a2e;
     overflow-x: hidden;
@@ -78,7 +78,7 @@
 
   /* Fallback */
   body {
-    font-family: 'Ubuntu', system-ui, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     overflow-x: hidden;
   }
 }
@@ -151,7 +151,7 @@
 .os-title {
   flex: 1;
   text-align: center;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 11px;
   font-weight: 400;
 }

@@ -22,8 +22,8 @@ export default {
         },
       },
       fontFamily: {
-        ubuntu: ['Ubuntu', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Consolas', 'monospace'],
+        grotesk: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        mono: ['Space Mono', 'Consolas', 'monospace'],
       },
       animation: {
         scroll: 'scroll 20s linear infinite',
