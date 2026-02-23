@@ -59,10 +59,10 @@ function MonitorApp() {
 
 /* ─── File Manager (projects) ─── */
 const projectFiles = [
-  { name: 'E-Commerce Platform', icon: '🛒', type: 'React', size: '2.4 MB', modified: 'Jun 2024' },
-  { name: 'HealthTrack App', icon: '💊', type: 'Flutter', size: '1.8 MB', modified: 'May 2024' },
-  { name: 'Corporate Portal', icon: '🏢', type: 'Next.js', size: '3.1 MB', modified: 'Apr 2024' },
-  { name: 'Financial Dashboard', icon: '📊', type: 'React', size: '2.7 MB', modified: 'Mar 2024' },
+  { name: 'E-Commerce Platform', image: '/1.png', type: 'React · Node.js · PostgreSQL', size: '24.6 MB', modified: 'Jan 15, 2025' },
+  { name: 'HealthTrack App', image: '/2.png', type: 'Flutter · Firebase · ML', size: '18.2 MB', modified: 'Feb 8, 2025' },
+  { name: 'Corporate Portal', image: '/5.png', type: 'React · Python · AWS', size: '31.4 MB', modified: 'Dec 20, 2024' },
+  { name: 'Financial Dashboard', image: '/4.png', type: 'React · D3.js · Node.js', size: '22.1 MB', modified: 'Nov 5, 2024' },
 ];
 
 function FilesApp() {
@@ -77,20 +77,28 @@ function FilesApp() {
       </div>
 
       {/* File grid */}
-      <div className="flex-1 overflow-auto p-4 grid grid-cols-2 gap-3">
+      <div className="flex-1 overflow-auto p-3 grid grid-cols-2 gap-3">
         {projectFiles.map(f => (
           <div
             key={f.name}
-            className="file-card p-3 flex flex-col gap-2 bg-os-window hover:bg-os-titlebar/60"
+            className="file-card p-2.5 flex flex-col gap-2 bg-os-window hover:bg-os-titlebar/60"
           >
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{f.icon}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-mono text-os-text truncate">{f.name}</p>
-                <p className="text-[10px] font-mono text-os-dim">{f.type} · {f.size}</p>
+            {/* Thumbnail */}
+            <div className="aspect-video rounded-md bg-os-bg overflow-hidden border border-os-border/30">
+              <img
+                src={f.image}
+                alt={f.name}
+                className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-mono text-os-text truncate">{f.name}</p>
+              <p className="text-[9px] font-mono text-os-dim mt-0.5">{f.type}</p>
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-[9px] font-mono text-os-dim">{f.size}</span>
+                <span className="text-[9px] font-mono text-os-dim">{f.modified}</span>
               </div>
             </div>
-            <p className="text-[9px] font-mono text-os-dim">{f.modified}</p>
           </div>
         ))}
       </div>
@@ -98,7 +106,7 @@ function FilesApp() {
       {/* Status bar */}
       <div className="px-4 py-1.5 border-t border-os-border text-[10px] font-mono text-os-dim flex justify-between">
         <span>{projectFiles.length} items</span>
-        <span>12.4 GB free</span>
+        <span>72 GB free</span>
       </div>
     </div>
   );
